@@ -1,0 +1,101 @@
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "initials" TEXT NOT NULL,
+    "color" TEXT NOT NULL DEFAULT '#6366f1',
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "Category" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "icon" TEXT NOT NULL DEFAULT 'Tag',
+    "isCustom" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "Expense" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "amountPaise" INTEGER NOT NULL,
+    "date" DATETIME NOT NULL,
+    "userId" TEXT NOT NULL,
+    "categoryId" TEXT NOT NULL,
+    "subcategory" TEXT,
+    "description" TEXT NOT NULL,
+    "paymentMethod" TEXT NOT NULL,
+    "notes" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Expense_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Expense_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Income" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "month" INTEGER NOT NULL,
+    "year" INTEGER NOT NULL,
+    "amountPaise" INTEGER NOT NULL,
+    "source" TEXT NOT NULL,
+    "userId" TEXT,
+    "notes" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Income_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Budget" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "categoryId" TEXT NOT NULL,
+    "month" INTEGER NOT NULL,
+    "year" INTEGER NOT NULL,
+    "amountPaise" INTEGER NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Budget_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Settings" (
+    "id" TEXT NOT NULL PRIMARY KEY DEFAULT 'singleton',
+    "warningThresholdPercent" INTEGER NOT NULL DEFAULT 70,
+    "criticalThresholdPercent" INTEGER NOT NULL DEFAULT 100,
+    "creditCardWarningPaise" INTEGER NOT NULL DEFAULT 4000000,
+    "budgetWarningPercent" INTEGER NOT NULL DEFAULT 80,
+    "budgetCriticalPercent" INTEGER NOT NULL DEFAULT 100
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_name_key" ON "User"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
+
+-- CreateIndex
+CREATE INDEX "Expense_date_idx" ON "Expense"("date");
+
+-- CreateIndex
+CREATE INDEX "Expense_userId_idx" ON "Expense"("userId");
+
+-- CreateIndex
+CREATE INDEX "Expense_categoryId_idx" ON "Expense"("categoryId");
+
+-- CreateIndex
+CREATE INDEX "Expense_paymentMethod_idx" ON "Expense"("paymentMethod");
+
+-- CreateIndex
+CREATE INDEX "Income_year_month_idx" ON "Income"("year", "month");
+
+-- CreateIndex
+CREATE INDEX "Income_userId_idx" ON "Income"("userId");
+
+-- CreateIndex
+CREATE INDEX "Budget_year_month_idx" ON "Budget"("year", "month");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Budget_categoryId_month_year_key" ON "Budget"("categoryId", "month", "year");

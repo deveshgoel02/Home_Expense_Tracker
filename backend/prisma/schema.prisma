@@ -1,0 +1,102 @@
+// Family Home Expense Tracker - Database Schema
+// Money is stored as an integer number of paise (1 rupee = 100 paise)
+// to avoid floating point rounding errors anywhere in the system.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite has no native enum support in Prisma, so PaymentMethod is stored as a
+// String column. The allowed values (CASH, DEBIT_CARD, CREDIT_CARD, BANK_TRANSFER,
+// UPI, OTHER) are enforced by the zod schema in src/validation.ts at the API boundary.
+
+model User {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  initials  String
+  color     String   @default("#6366f1")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  expenses  Expense[]
+  incomes   Income[]
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  icon      String   @default("Tag")
+  isCustom  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  expenses  Expense[]
+  budgets   Budget[]
+}
+
+model Expense {
+  id            String        @id @default(cuid())
+  amountPaise   Int
+  date          DateTime
+  userId        String
+  categoryId    String
+  subcategory   String?
+  description   String
+  paymentMethod String
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id])
+  category      Category      @relation(fields: [categoryId], references: [id])
+
+  @@index([date])
+  @@index([userId])
+  @@index([categoryId])
+  @@index([paymentMethod])
+}
+
+model Income {
+  id          String   @id @default(cuid())
+  month       Int // 1-12
+  year        Int
+  amountPaise Int
+  source      String
+  userId      String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([year, month])
+  @@index([userId])
+}
+
+model Budget {
+  id          String   @id @default(cuid())
+  categoryId  String
+  month       Int // 1-12
+  year        Int
+  amountPaise Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([categoryId, month, year])
+  @@index([year, month])
+}
+
+model Settings {
+  id                        String @id @default("singleton")
+  warningThresholdPercent   Int    @default(70)
+  criticalThresholdPercent  Int    @default(100)
+  creditCardWarningPaise    Int    @default(4000000)
+  budgetWarningPercent      Int    @default(80)
+  budgetCriticalPercent     Int    @default(100)
+}
