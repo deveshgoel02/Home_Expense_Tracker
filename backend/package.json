@@ -10,7 +10,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "render-build": "npm install && prisma generate && prisma migrate deploy && npm run build",
+    "render-build": "npm install --include=dev && prisma generate && prisma migrate deploy && npm run build",
     "lint": "eslint src --ext .ts",
     "test": "vitest run",
     "test:watch": "vitest",
