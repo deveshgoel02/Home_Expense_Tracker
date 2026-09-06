@@ -5,8 +5,11 @@ import { asyncHandler } from "../middleware/errorHandler.js";
 import { createExpenseSchema, expenseQuerySchema, updateExpenseSchema } from "../validation.js";
 import { rupeesToPaise } from "../utils/money.js";
 import { NotFoundError } from "../utils/errors.js";
+import { requireAuth } from "../middleware/auth.js";
+import { SAFE_USER_SELECT } from "../services/userService.js";
 
 export const expensesRouter = Router();
+expensesRouter.use(requireAuth);
 
 function buildWhere(query: ReturnType<typeof expenseQuerySchema.parse>): Prisma.ExpenseWhereInput {
   const where: Prisma.ExpenseWhereInput = {};
@@ -46,7 +49,7 @@ function sortToOrderBy(sort: string): Prisma.ExpenseOrderByWithRelationInput {
   }
 }
 
-const includeRelations = { user: true, category: true } as const;
+const includeRelations = { user: { select: SAFE_USER_SELECT }, category: true } as const;
 
 expensesRouter.get(
   "/",

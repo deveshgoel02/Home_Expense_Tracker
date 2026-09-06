@@ -16,12 +16,15 @@ datasource db {
 // UPI, OTHER) are enforced by the zod schema in src/validation.ts at the API boundary.
 
 model User {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  initials  String
-  color     String   @default("#6366f1")
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id                String    @id @default(cuid())
+  name              String    @unique
+  initials          String
+  color             String    @default("#6366f1")
+  isActive          Boolean   @default(true)
+  passwordHash      String
+  mustChangePassword Boolean  @default(true)
+  lastLoginAt       DateTime?
+  createdAt         DateTime  @default(now())
 
   expenses  Expense[]
   incomes   Income[]

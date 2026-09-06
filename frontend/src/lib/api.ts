@@ -9,17 +9,32 @@ import type {
   MonthlyReport,
   Paginated,
   PaymentMethod,
+  PublicMember,
   Settings,
   User,
 } from "../types";
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "/api",
+  withCredentials: true, // sends/receives the httpOnly session cookie cross-origin
 });
+
+// Fired whenever a request comes back 401 outside of the login call itself,
+// so the app can drop back to the login screen. Wired up once from AuthContext.
+type UnauthorizedHandler = () => void;
+let onUnauthorized: UnauthorizedHandler | null = null;
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
+  onUnauthorized = handler;
+}
 
 api.interceptors.response.use(
   (res) => res,
   (error) => {
+    const status = error.response?.status;
+    const isLoginCall = error.config?.url?.includes("/auth/login");
+    if (status === 401 && !isLoginCall) {
+      onUnauthorized?.();
+    }
     const message = error.response?.data?.error ?? error.message ?? "Something went wrong";
     return Promise.reject(new Error(message));
   }
@@ -71,6 +86,18 @@ export const usersApi = {
     api.get<User[]>("/users", { params: { includeInactive } }).then((r) => r.data),
   update: (id: string, data: Partial<Pick<User, "name" | "color" | "isActive">>) =>
     api.patch<User>(`/users/${id}`, data).then((r) => r.data),
+  create: (data: { name: string; color?: string }) =>
+    api.post<{ user: User; temporaryPassword?: string }>("/users", data).then((r) => r.data),
+};
+
+export const authApi = {
+  members: () => api.get<PublicMember[]>("/auth/members").then((r) => r.data),
+  me: () => api.get<{ user: User }>("/auth/me").then((r) => r.data.user),
+  login: (name: string, password: string) =>
+    api.post<{ user: User }>("/auth/login", { name, password }).then((r) => r.data.user),
+  logout: () => api.post("/auth/logout"),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post("/auth/change-password", { currentPassword, newPassword }),
 };
 
 export const categoriesApi = {

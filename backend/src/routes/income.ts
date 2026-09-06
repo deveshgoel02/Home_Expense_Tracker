@@ -4,8 +4,13 @@ import { asyncHandler } from "../middleware/errorHandler.js";
 import { createIncomeSchema, updateIncomeSchema } from "../validation.js";
 import { rupeesToPaise } from "../utils/money.js";
 import { NotFoundError } from "../utils/errors.js";
+import { requireAuth } from "../middleware/auth.js";
+import { SAFE_USER_SELECT } from "../services/userService.js";
 
 export const incomeRouter = Router();
+incomeRouter.use(requireAuth);
+
+const includeUser = { user: { select: SAFE_USER_SELECT } } as const;
 
 incomeRouter.get(
   "/",
@@ -20,7 +25,7 @@ incomeRouter.get(
         ...(year ? { year } : {}),
         ...(userId ? { userId } : {}),
       },
-      include: { user: true },
+      include: includeUser,
       orderBy: [{ year: "desc" }, { month: "desc" }, { createdAt: "desc" }],
     });
     res.json(incomes);
@@ -40,7 +45,7 @@ incomeRouter.post(
         userId: data.userId ?? null,
         notes: data.notes ?? null,
       },
-      include: { user: true },
+      include: includeUser,
     });
     res.status(201).json(income);
   })
@@ -63,7 +68,7 @@ incomeRouter.put(
         ...(data.userId !== undefined ? { userId: data.userId } : {}),
         ...(data.notes !== undefined ? { notes: data.notes } : {}),
       },
-      include: { user: true },
+      include: includeUser,
     });
     res.json(income);
   })

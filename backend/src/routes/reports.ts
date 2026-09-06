@@ -3,8 +3,10 @@ import { asyncHandler } from "../middleware/errorHandler.js";
 import { periodQuerySchema } from "../validation.js";
 import { buildMemberReport, buildMonthlyReport } from "../services/reportService.js";
 import { NotFoundError } from "../utils/errors.js";
+import { requireAuth } from "../middleware/auth.js";
 
 export const reportsRouter = Router();
+reportsRouter.use(requireAuth);
 
 function resolvePeriod(req: import("express").Request) {
   const now = new Date();

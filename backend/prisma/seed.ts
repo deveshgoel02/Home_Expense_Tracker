@@ -1,8 +1,16 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 type PaymentMethod = "CASH" | "DEBIT_CARD" | "CREDIT_CARD" | "BANK_TRANSFER" | "UPI" | "OTHER";
 
 const prisma = new PrismaClient();
+
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+function generateTempPassword(length = 10): string {
+  let out = "";
+  for (let i = 0; i < length; i++) out += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+  return out;
+}
 
 const FAMILY_MEMBERS = [
   { name: "Vivek", initials: "VV", color: "#6366f1" },
@@ -81,8 +89,16 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.settings.deleteMany();
 
+  const credentials: { name: string; password: string }[] = [];
   const users = await Promise.all(
-    FAMILY_MEMBERS.map((m) => prisma.user.create({ data: { name: m.name, initials: m.initials, color: m.color } }))
+    FAMILY_MEMBERS.map(async (m) => {
+      const password = generateTempPassword();
+      credentials.push({ name: m.name, password });
+      const passwordHash = await bcrypt.hash(password, 12);
+      return prisma.user.create({
+        data: { name: m.name, initials: m.initials, color: m.color, passwordHash, mustChangePassword: true },
+      });
+    })
   );
 
   const categories = await Promise.all(CATEGORIES.map((name) => prisma.category.create({ data: { name } })));
@@ -225,6 +241,10 @@ async function main() {
   }
 
   console.log(`Seeded ${users.length} users, ${categories.length} categories, ${months.length} months of income, ${expenseCount} expenses.`);
+  console.log("\nTemporary login passwords (each member should change theirs after first login):");
+  for (const c of credentials) {
+    console.log(`  ${c.name.padEnd(14)} ${c.password}`);
+  }
 }
 
 main()

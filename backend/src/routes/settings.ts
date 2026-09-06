@@ -2,8 +2,10 @@ import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { updateSettingsSchema } from "../validation.js";
+import { requireAuth } from "../middleware/auth.js";
 
 export const settingsRouter = Router();
+settingsRouter.use(requireAuth);
 
 async function getOrCreateSettings() {
   const existing = await prisma.settings.findUnique({ where: { id: "singleton" } });

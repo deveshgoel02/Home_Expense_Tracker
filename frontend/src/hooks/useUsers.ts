@@ -16,3 +16,14 @@ export function useUpdateUser() {
     },
   });
 }
+
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; color?: string }) => usersApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["auth", "members"] });
+    },
+  });
+}

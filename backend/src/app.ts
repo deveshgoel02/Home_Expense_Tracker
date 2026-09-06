@@ -1,6 +1,11 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { authRouter } from "./routes/auth.js";
+import { adminRouter } from "./routes/admin.js";
 import { usersRouter } from "./routes/users.js";
 import { categoriesRouter } from "./routes/categories.js";
 import { expensesRouter } from "./routes/expenses.js";
@@ -25,14 +30,32 @@ function buildCorsOrigin() {
   };
 }
 
+// A generous ceiling that only kicks in against abuse/bugs, not real usage —
+// this is a 6-person household app, not a public API.
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 600,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export function createApp() {
   const app = express();
 
-  app.use(cors({ origin: buildCorsOrigin() }));
-  app.use(express.json());
+  app.disable("x-powered-by");
+  app.set("trust proxy", 1); // Render/Vercel sit behind a proxy; needed for correct rate-limit IPs and secure cookies
+  // This is a pure JSON API called cross-origin from the Vercel frontend, so
+  // relax the resource-policy default that assumes a same-origin web app.
+  app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+  app.use(cors({ origin: buildCorsOrigin(), credentials: true }));
+  app.use(express.json({ limit: "1mb" }));
+  app.use(cookieParser());
+  app.use("/api", apiLimiter);
 
   app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
+  app.use("/api/auth", authRouter);
+  app.use("/api/admin", adminRouter);
   app.use("/api/users", usersRouter);
   app.use("/api/categories", categoriesRouter);
   app.use("/api/expenses", expensesRouter);

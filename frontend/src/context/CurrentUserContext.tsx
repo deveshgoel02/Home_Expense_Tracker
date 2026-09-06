@@ -1,42 +1,52 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { usersApi } from "../lib/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { authApi, setUnauthorizedHandler } from "../lib/api";
 import type { User } from "../types";
-
-const STORAGE_KEY = "family-expense-tracker:current-user-id";
 
 interface CurrentUserContextValue {
   currentUser: User | null;
-  users: User[];
   isLoading: boolean;
-  setCurrentUserId: (id: string | null) => void;
+  login: (name: string, password: string) => Promise<User>;
+  logout: () => Promise<void>;
 }
 
 const CurrentUserContext = createContext<CurrentUserContextValue | undefined>(undefined);
 
 export function CurrentUserProvider({ children }: { children: ReactNode }) {
-  const { data: users = [], isLoading } = useQuery({ queryKey: ["users"], queryFn: () => usersApi.list() });
-  const [currentUserId, setCurrentUserIdState] = useState<string | null>(() =>
-    localStorage.getItem(STORAGE_KEY)
-  );
+  const queryClient = useQueryClient();
+  const [loggedOut, setLoggedOut] = useState(false);
+
+  const { data: currentUser, isLoading } = useQuery({
+    queryKey: ["auth", "me"],
+    queryFn: () => authApi.me(),
+    retry: false,
+    enabled: !loggedOut,
+  });
 
   useEffect(() => {
-    if (currentUserId && !isLoading && !users.some((u) => u.id === currentUserId)) {
-      setCurrentUserIdState(null);
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }, [currentUserId, users, isLoading]);
+    setUnauthorizedHandler(() => {
+      queryClient.setQueryData(["auth", "me"], null);
+      setLoggedOut(true);
+    });
+    return () => setUnauthorizedHandler(null);
+  }, [queryClient]);
 
-  const setCurrentUserId = (id: string | null) => {
-    setCurrentUserIdState(id);
-    if (id) localStorage.setItem(STORAGE_KEY, id);
-    else localStorage.removeItem(STORAGE_KEY);
-  };
+  async function login(name: string, password: string) {
+    const user = await authApi.login(name, password);
+    setLoggedOut(false);
+    queryClient.setQueryData(["auth", "me"], user);
+    return user;
+  }
 
-  const currentUser = users.find((u) => u.id === currentUserId) ?? null;
+  async function logout() {
+    await authApi.logout();
+    setLoggedOut(true);
+    queryClient.setQueryData(["auth", "me"], null);
+    queryClient.clear();
+  }
 
   return (
-    <CurrentUserContext.Provider value={{ currentUser, users, isLoading, setCurrentUserId }}>
+    <CurrentUserContext.Provider value={{ currentUser: currentUser ?? null, isLoading: loggedOut ? false : isLoading, login, logout }}>
       {children}
     </CurrentUserContext.Provider>
   );

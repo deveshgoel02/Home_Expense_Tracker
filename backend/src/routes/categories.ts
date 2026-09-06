@@ -3,8 +3,10 @@ import { prisma } from "../lib/prisma.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { createCategorySchema } from "../validation.js";
 import { ConflictError } from "../utils/errors.js";
+import { requireAuth } from "../middleware/auth.js";
 
 export const categoriesRouter = Router();
+categoriesRouter.use(requireAuth);
 
 categoriesRouter.get(
   "/",

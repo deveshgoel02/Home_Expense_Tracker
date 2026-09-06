@@ -12,6 +12,9 @@ import {
 } from "./calculations.js";
 import { getCategoryNameMap, getMonthExpenses, getMonthIncomes, getSettingsOrDefault, getUserNameMap } from "./dataAccess.js";
 import { daysInMonth, previousMonth } from "./period.js";
+import { SAFE_USER_SELECT } from "./userService.js";
+
+const includeUserAndCategory = { user: { select: SAFE_USER_SELECT }, category: true } as const;
 
 export async function buildMonthlySummaryBundle(month: number, year: number) {
   const [expenses, incomes, categoryNames, userNames, settings] = await Promise.all([
@@ -48,7 +51,7 @@ export async function buildDashboard(month: number, year: number) {
   const recentTransactions = await prisma.expense.findMany({
     orderBy: { date: "desc" },
     take: 20,
-    include: { user: true, category: true },
+    include: includeUserAndCategory,
   });
 
   const [budgets, settings] = await Promise.all([
@@ -94,7 +97,7 @@ export async function buildMonthlyReport(month: number, year: number) {
   const topExpenseDetails = topExpenseIds.length
     ? await prisma.expense.findMany({
         where: { id: { in: topExpenseIds } },
-        include: { user: true, category: true },
+        include: includeUserAndCategory,
       })
     : [];
   const orderedTopExpenses = topExpenseIds
@@ -115,7 +118,7 @@ export async function buildMonthlyReport(month: number, year: number) {
 }
 
 export async function buildMemberReport(userId: string, month: number, year: number) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: SAFE_USER_SELECT });
   if (!user) return null;
 
   const prev = previousMonth(month, year);

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useUsers, useUpdateUser } from "../hooks/useUsers";
 import { useDashboard } from "../hooks/useDashboard";
+import { useCurrentUser } from "../context/CurrentUserContext";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Skeleton } from "../components/ui/Skeleton";
@@ -16,6 +17,7 @@ export default function Family() {
   const { data: users = [], isLoading } = useUsers(true);
   const { data: dashboard } = useDashboard(month, year);
   const updateUser = useUpdateUser();
+  const { currentUser } = useCurrentUser();
 
   const spendByUser = new Map(dashboard?.userBreakdown.map((b) => [b.key, b.amountPaise]) ?? []);
 
@@ -62,12 +64,14 @@ export default function Family() {
               </div>
             </Link>
             <div className="flex flex-shrink-0 items-center gap-2">
-              <button
-                onClick={() => toggleActive(user.id, user.isActive)}
-                className="text-xs font-medium text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
-              >
-                {user.isActive ? "Deactivate" : "Activate"}
-              </button>
+              {currentUser?.id !== user.id && (
+                <button
+                  onClick={() => toggleActive(user.id, user.isActive)}
+                  className="text-xs font-medium text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                >
+                  {user.isActive ? "Deactivate" : "Activate"}
+                </button>
+              )}
               <Link
                 to={`/family/${user.id}`}
                 className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"

@@ -15,7 +15,15 @@ export interface User {
   initials: string;
   color: string;
   isActive: boolean;
+  mustChangePassword: boolean;
   createdAt: string;
+}
+
+export interface PublicMember {
+  id: string;
+  name: string;
+  initials: string;
+  color: string;
 }
 
 export interface Category {

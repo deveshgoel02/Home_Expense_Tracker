@@ -62,6 +62,27 @@ export const updateUserSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .max(200);
+
+export const createUserSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  password: passwordSchema.optional(),
+  color: z.string().optional(),
+});
+
+export const loginSchema = z.object({
+  name: z.string().min(1, "Please select who you are"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: passwordSchema,
+});
+
 export const updateSettingsSchema = z.object({
   warningThresholdPercent: z.number().int().min(1).max(100).optional(),
   criticalThresholdPercent: z.number().int().min(1).max(200).optional(),

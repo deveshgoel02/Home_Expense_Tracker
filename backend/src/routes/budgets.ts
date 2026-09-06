@@ -4,8 +4,10 @@ import { asyncHandler } from "../middleware/errorHandler.js";
 import { createBudgetSchema, updateBudgetSchema } from "../validation.js";
 import { rupeesToPaise } from "../utils/money.js";
 import { ConflictError, NotFoundError } from "../utils/errors.js";
+import { requireAuth } from "../middleware/auth.js";
 
 export const budgetsRouter = Router();
+budgetsRouter.use(requireAuth);
 
 budgetsRouter.get(
   "/",

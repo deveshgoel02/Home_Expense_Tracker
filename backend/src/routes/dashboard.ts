@@ -2,8 +2,10 @@ import { Router } from "express";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { periodQuerySchema } from "../validation.js";
 import { buildDashboard } from "../services/reportService.js";
+import { requireAuth } from "../middleware/auth.js";
 
 export const dashboardRouter = Router();
+dashboardRouter.use(requireAuth);
 
 dashboardRouter.get(
   "/",
