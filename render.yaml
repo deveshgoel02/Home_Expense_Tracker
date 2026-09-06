@@ -1,7 +1,10 @@
 # Render Blueprint — lets you deploy the backend with "New + Blueprint" on render.com,
 # pointing at this repo, instead of configuring every field by hand.
-# See DEPLOYMENT.md for the full step-by-step walkthrough, including the important
-# note about SQLite's ephemeral storage on Render's free tier.
+# See DEPLOYMENT.md for the full step-by-step walkthrough.
+#
+# DATABASE_URL and DIRECT_URL are Neon Postgres connection strings (pooled and direct,
+# respectively — see backend/prisma/schema.prisma) and are set manually per-environment
+# rather than committed here, so they're marked `sync: false`.
 services:
   - type: web
     name: family-expense-backend
@@ -13,7 +16,9 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
-        value: file:./dev.db
+        sync: false
+      - key: DIRECT_URL
+        sync: false
       - key: FRONTEND_URL
         sync: false
       - key: JWT_SECRET

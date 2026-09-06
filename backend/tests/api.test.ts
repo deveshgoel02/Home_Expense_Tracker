@@ -212,7 +212,7 @@ describe("GET /api/dashboard", () => {
     expect(res.body.summary).toBeDefined();
     expect(res.body.categoryBreakdown).toBeInstanceOf(Array);
     expect(res.body.alerts).toBeInstanceOf(Array);
-  });
+  }, 15000);
 
   it("handles a month with no data gracefully", async () => {
     const res = await agent.get("/api/dashboard?month=1&year=2000");

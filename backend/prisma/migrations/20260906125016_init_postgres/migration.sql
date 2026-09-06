@@ -1,73 +1,84 @@
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "initials" TEXT NOT NULL,
     "color" TEXT NOT NULL DEFAULT '#6366f1',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "passwordHash" TEXT NOT NULL,
+    "mustChangePassword" BOOLEAN NOT NULL DEFAULT true,
+    "lastLoginAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Category" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "icon" TEXT NOT NULL DEFAULT 'Tag',
     "isCustom" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Expense" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "amountPaise" INTEGER NOT NULL,
-    "date" DATETIME NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
     "userId" TEXT NOT NULL,
     "categoryId" TEXT NOT NULL,
     "subcategory" TEXT,
     "description" TEXT NOT NULL,
     "paymentMethod" TEXT NOT NULL,
     "notes" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Expense_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Expense_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Expense_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Income" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "month" INTEGER NOT NULL,
     "year" INTEGER NOT NULL,
     "amountPaise" INTEGER NOT NULL,
     "source" TEXT NOT NULL,
     "userId" TEXT,
     "notes" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Income_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Income_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Budget" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "categoryId" TEXT NOT NULL,
     "month" INTEGER NOT NULL,
     "year" INTEGER NOT NULL,
     "amountPaise" INTEGER NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Budget_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Budget_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Settings" (
-    "id" TEXT NOT NULL PRIMARY KEY DEFAULT 'singleton',
+    "id" TEXT NOT NULL DEFAULT 'singleton',
     "warningThresholdPercent" INTEGER NOT NULL DEFAULT 70,
     "criticalThresholdPercent" INTEGER NOT NULL DEFAULT 100,
     "creditCardWarningPaise" INTEGER NOT NULL DEFAULT 4000000,
     "budgetWarningPercent" INTEGER NOT NULL DEFAULT 80,
-    "budgetCriticalPercent" INTEGER NOT NULL DEFAULT 100
+    "budgetCriticalPercent" INTEGER NOT NULL DEFAULT 100,
+
+    CONSTRAINT "Settings_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -99,3 +110,15 @@ CREATE INDEX "Budget_year_month_idx" ON "Budget"("year", "month");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Budget_categoryId_month_year_key" ON "Budget"("categoryId", "month", "year");
+
+-- AddForeignKey
+ALTER TABLE "Expense" ADD CONSTRAINT "Expense_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Expense" ADD CONSTRAINT "Expense_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Income" ADD CONSTRAINT "Income_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Budget" ADD CONSTRAINT "Budget_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -7,13 +7,15 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled connection, used for normal app queries
+  directUrl = env("DIRECT_URL")   // unpooled connection, used only by `prisma migrate`
 }
 
-// SQLite has no native enum support in Prisma, so PaymentMethod is stored as a
-// String column. The allowed values (CASH, DEBIT_CARD, CREDIT_CARD, BANK_TRANSFER,
-// UPI, OTHER) are enforced by the zod schema in src/validation.ts at the API boundary.
+// PaymentMethod is stored as a String column (kept this way after moving off SQLite,
+// which has no native enum support, so the app code didn't need to change). The
+// allowed values (CASH, DEBIT_CARD, CREDIT_CARD, BANK_TRANSFER, UPI, OTHER) are
+// enforced by the zod schema in src/validation.ts at the API boundary.
 
 model User {
   id                String    @id @default(cuid())
