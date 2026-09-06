@@ -22,7 +22,7 @@ function deriveInitials(name: string): string {
   return (words[0][0] + words[1][0]).toUpperCase();
 }
 
-export async function createFamilyMember(input: { name: string; password: string; color?: string }) {
+export async function createFamilyMember(input: { name: string; password: string; color?: string; initials?: string }) {
   const existing = await prisma.user.findUnique({ where: { name: input.name } });
   if (existing) throw new ConflictError("A family member with this name already exists");
 
@@ -32,7 +32,7 @@ export async function createFamilyMember(input: { name: string; password: string
   return prisma.user.create({
     data: {
       name: input.name,
-      initials: deriveInitials(input.name),
+      initials: input.initials ?? deriveInitials(input.name),
       color: input.color ?? PALETTE[userCount % PALETTE.length],
       passwordHash,
       mustChangePassword: true,

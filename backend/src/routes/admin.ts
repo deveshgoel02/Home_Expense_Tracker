@@ -13,7 +13,14 @@ const DEFAULT_CATEGORIES = [
   "Dining", "Entertainment", "Subscriptions", "Repairs", "Domestic Help", "Other",
 ];
 
-const DEFAULT_MEMBERS = ["Vivek", "Rekha", "Dhruv", "Devesh", "Aruna (Dadi)", "Vinti"];
+const DEFAULT_MEMBERS = [
+  { name: "Vivek", initials: "VV", color: "#6366f1" },
+  { name: "Rekha", initials: "RK", color: "#ec4899" },
+  { name: "Dhruv", initials: "DH", color: "#0ea5e9" },
+  { name: "Devesh", initials: "DV", color: "#10b981" },
+  { name: "Aruna (Dadi)", initials: "AD", color: "#f59e0b" },
+  { name: "Vinti", initials: "VN", color: "#8b5cf6" },
+];
 
 // One-time setup for a freshly deployed, empty database: creates the default
 // family members (with generated temporary passwords, returned once in the
@@ -38,10 +45,10 @@ adminRouter.post(
     }
 
     const createdMembers: { name: string; tempPassword: string }[] = [];
-    for (const name of DEFAULT_MEMBERS) {
+    for (const member of DEFAULT_MEMBERS) {
       const tempPassword = generateTempPassword();
-      await createFamilyMember({ name, password: tempPassword });
-      createdMembers.push({ name, tempPassword });
+      await createFamilyMember({ name: member.name, password: tempPassword, initials: member.initials, color: member.color });
+      createdMembers.push({ name: member.name, tempPassword });
     }
 
     for (const name of DEFAULT_CATEGORIES) {
