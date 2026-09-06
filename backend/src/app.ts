@@ -10,10 +10,25 @@ import { dashboardRouter } from "./routes/dashboard.js";
 import { reportsRouter } from "./routes/reports.js";
 import { settingsRouter } from "./routes/settings.js";
 
+// Accepts the configured FRONTEND_URL plus any *.vercel.app preview deployment,
+// so pull-request previews on Vercel work without touching this env var each time.
+function buildCorsOrigin() {
+  const configured = process.env.FRONTEND_URL ?? "http://localhost:5173";
+  return (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin || origin === configured) return callback(null, true);
+    try {
+      if (/\.vercel\.app$/.test(new URL(origin).hostname)) return callback(null, true);
+    } catch {
+      // malformed Origin header — fall through to reject
+    }
+    return callback(null, false);
+  };
+}
+
 export function createApp() {
   const app = express();
 
-  app.use(cors({ origin: process.env.FRONTEND_URL ?? "http://localhost:5173" }));
+  app.use(cors({ origin: buildCorsOrigin() }));
   app.use(express.json());
 
   app.get("/api/health", (_req, res) => res.json({ status: "ok" }));

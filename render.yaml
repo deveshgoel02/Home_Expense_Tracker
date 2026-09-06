@@ -1,0 +1,18 @@
+# Render Blueprint — lets you deploy the backend with "New + Blueprint" on render.com,
+# pointing at this repo, instead of configuring every field by hand.
+# See DEPLOYMENT.md for the full step-by-step walkthrough, including the important
+# note about SQLite's ephemeral storage on Render's free tier.
+services:
+  - type: web
+    name: family-expense-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm run render-build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: FRONTEND_URL
+        sync: false

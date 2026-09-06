@@ -177,6 +177,10 @@ npm run preview     # serve the production build locally
 
 ## 9. Deployment Notes
 
+For step-by-step Render (backend) + Vercel (frontend) deployment instructions —
+including a `render.yaml` blueprint and `vercel.json` already in this repo — see
+[DEPLOYMENT.md](./DEPLOYMENT.md).
+
 - The backend is a standard Node/Express app — deploy `backend/dist` behind any Node
   host (a VPS, Railway, Render, etc.) after running `npm run build`. Set `DATABASE_URL`
   to a persistent file path (SQLite) or a managed PostgreSQL instance (see above) and
