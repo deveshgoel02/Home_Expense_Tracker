@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   breakdownByCategory,
+  computeBudgetPace,
   computeBudgetStatus,
   computeMonthlySummary,
   compareMonths,
   generateAlerts,
+  generateBudgetPaceAlerts,
   generateInsights,
   type ExpenseLike,
   type IncomeLike,
@@ -214,6 +216,84 @@ describe("computeBudgetStatus", () => {
     const status = computeBudgetStatus([{ categoryId: "petrol", amountPaise: 1200000 }], [], { petrol: "Petrol" }, 80, 100);
     expect(status[0].percentUsed).toBe(0);
     expect(status[0].severity).toBe("info");
+  });
+});
+
+describe("computeBudgetPace", () => {
+  it("projects a category to exceed its budget when early spending is already running hot", () => {
+    // 10 days into a 30-day month, already spent 40% of a ₹10,000 budget -> projected 120%
+    const status = computeBudgetStatus(
+      [{ categoryId: "dining", amountPaise: 1000000 }],
+      breakdownByCategory([expense({ categoryId: "dining", amountPaise: 400000 })], { dining: "Dining" }),
+      { dining: "Dining" },
+      80,
+      100
+    );
+    const pace = computeBudgetPace(status, 10, 30, 100);
+    expect(pace[0].projectedPaise).toBe(1200000);
+    expect(pace[0].projectedPercentUsed).toBe(120);
+    expect(pace[0].onPaceToExceed).toBe(true);
+  });
+
+  it("does not flag onPaceToExceed for a category already marked critical (avoids duplicate alerts)", () => {
+    const status = computeBudgetStatus(
+      [{ categoryId: "dining", amountPaise: 1500000 }],
+      breakdownByCategory([expense({ categoryId: "dining", amountPaise: 1500000 })], { dining: "Dining" }),
+      { dining: "Dining" },
+      80,
+      100
+    );
+    const pace = computeBudgetPace(status, 10, 30, 100);
+    expect(pace[0].severity).toBe("critical");
+    expect(pace[0].onPaceToExceed).toBe(false);
+  });
+
+  it("does not flag a category spending well within pace", () => {
+    const status = computeBudgetStatus(
+      [{ categoryId: "dining", amountPaise: 100000 }],
+      breakdownByCategory([expense({ categoryId: "dining", amountPaise: 100000 })], { dining: "Dining" }),
+      { dining: "Dining" },
+      80,
+      100
+    );
+    const pace = computeBudgetPace(status, 10, 30, 100);
+    expect(pace[0].onPaceToExceed).toBe(false);
+  });
+});
+
+describe("generateBudgetPaceAlerts", () => {
+  it("emits a critical alert for an already-exceeded budget and a warning for a projected one", () => {
+    const alerts = generateBudgetPaceAlerts([
+      {
+        categoryId: "dining",
+        categoryLabel: "Dining",
+        budgetPaise: 1000000,
+        actualPaise: 1500000,
+        remainingPaise: -500000,
+        percentUsed: 150,
+        severity: "critical",
+        projectedPaise: 1500000,
+        projectedPercentUsed: 150,
+        onPaceToExceed: false,
+      },
+      {
+        categoryId: "petrol",
+        categoryLabel: "Petrol",
+        budgetPaise: 1000000,
+        actualPaise: 400000,
+        remainingPaise: 600000,
+        percentUsed: 40,
+        severity: "info",
+        projectedPaise: 1200000,
+        projectedPercentUsed: 120,
+        onPaceToExceed: true,
+      },
+    ]);
+    expect(alerts).toHaveLength(2);
+    expect(alerts[0].severity).toBe("critical");
+    expect(alerts[0].message).toContain("Dining budget exceeded");
+    expect(alerts[1].severity).toBe("warning");
+    expect(alerts[1].message).toContain("Petrol is on pace to exceed");
   });
 });
 

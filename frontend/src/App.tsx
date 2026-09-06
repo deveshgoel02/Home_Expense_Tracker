@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
 import Income from "./pages/Income";
 import Budgets from "./pages/Budgets";
+import BudgetPlanner from "./pages/BudgetPlanner";
 import Family from "./pages/Family";
 import MemberReport from "./pages/MemberReport";
 import Reports from "./pages/Reports";
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/income" element={<Income />} />
           <Route path="/budgets" element={<Budgets />} />
+          <Route path="/budget-planner" element={<BudgetPlanner />} />
           <Route path="/family" element={<Family />} />
           <Route path="/family/:id" element={<MemberReport />} />
           <Route path="/reports" element={<Reports />} />

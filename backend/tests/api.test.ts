@@ -246,6 +246,58 @@ describe("GET /api/reports/member/:id", () => {
   });
 });
 
+describe("Budget Planner", () => {
+  const PLAN_MONTH = 6;
+  const PLAN_YEAR = 2099; // far-future month, guaranteed not to collide with other tests' budgets
+
+  afterAll(async () => {
+    await prisma.budget.deleteMany({ where: { month: PLAN_MONTH, year: PLAN_YEAR } });
+  });
+
+  it("rejects an unauthenticated request", async () => {
+    const res = await request(app)
+      .post("/api/budget-planner/plan")
+      .send({ month: PLAN_MONTH, year: PLAN_YEAR, income: 100000, fixedExpenses: [] });
+    expect(res.status).toBe(401);
+  });
+
+  it("generates a plan that allocates fixed, essential and discretionary categories", async () => {
+    const res = await agent.post("/api/budget-planner/plan").send({
+      month: PLAN_MONTH,
+      year: PLAN_YEAR,
+      income: 200000,
+      fixedExpenses: [{ label: "Rent", amount: 40000, categoryId }],
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.fixedTotalPaise).toBe(4000000);
+    expect(res.body.savingsTargetPaise).toBeGreaterThan(0);
+    const fixedEntry = res.body.categories.find((c: { categoryId: string }) => c.categoryId === categoryId);
+    expect(fixedEntry.group).toBe("fixed");
+    expect(fixedEntry.suggestedPaise).toBe(4000000);
+  });
+
+  it("applies a plan by creating budget rows, and re-applying updates them instead of duplicating", async () => {
+    const applyRes = await agent.post("/api/budget-planner/apply").send({
+      month: PLAN_MONTH,
+      year: PLAN_YEAR,
+      allocations: [{ categoryId, amount: 15000 }],
+    });
+    expect(applyRes.status).toBe(200);
+    expect(applyRes.body[0].amountPaise).toBe(1500000);
+
+    const reapplyRes = await agent.post("/api/budget-planner/apply").send({
+      month: PLAN_MONTH,
+      year: PLAN_YEAR,
+      allocations: [{ categoryId, amount: 18000 }],
+    });
+    expect(reapplyRes.status).toBe(200);
+    expect(reapplyRes.body[0].amountPaise).toBe(1800000);
+
+    const budgets = await prisma.budget.findMany({ where: { categoryId, month: PLAN_MONTH, year: PLAN_YEAR } });
+    expect(budgets).toHaveLength(1);
+  }, 15000);
+});
+
 describe("POST /api/admin/bootstrap", () => {
   it("refuses without the correct secret", async () => {
     const res = await request(app).post("/api/admin/bootstrap").set("x-bootstrap-secret", "wrong");

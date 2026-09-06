@@ -1,9 +1,11 @@
 import axios from "axios";
 import type {
   Budget,
+  BudgetPlan,
   Category,
   Dashboard,
   Expense,
+  FixedExpenseInput,
   Income,
   MemberReport,
   MonthlyReport,
@@ -134,6 +136,13 @@ export const budgetsApi = {
   create: (data: BudgetInput) => api.post<Budget>("/budgets", data).then((r) => r.data),
   update: (id: string, amount: number) => api.put<Budget>(`/budgets/${id}`, { amount }).then((r) => r.data),
   remove: (id: string) => api.delete(`/budgets/${id}`),
+};
+
+export const budgetPlannerApi = {
+  plan: (data: { month: number; year: number; income: number; fixedExpenses: FixedExpenseInput[] }) =>
+    api.post<BudgetPlan>("/budget-planner/plan", data).then((r) => r.data),
+  apply: (data: { month: number; year: number; allocations: { categoryId: string; amount: number }[] }) =>
+    api.post<Budget[]>("/budget-planner/apply", data).then((r) => r.data),
 };
 
 export const dashboardApi = {

@@ -92,6 +92,34 @@ export const updateSettingsSchema = z.object({
   budgetCriticalPercent: z.number().int().min(1).max(200).optional(),
 });
 
+export const budgetPlanRequestSchema = z.object({
+  month: z.number().int().min(1).max(12),
+  year: z.number().int().min(2000).max(2100),
+  income: z.number().nonnegative(),
+  fixedExpenses: z
+    .array(
+      z.object({
+        label: z.string().min(1, "Label is required").max(100),
+        amount: z.number().positive("Amount must be greater than zero"),
+        categoryId: z.string().optional().nullable(),
+      })
+    )
+    .max(30),
+});
+
+export const applyBudgetPlanSchema = z.object({
+  month: z.number().int().min(1).max(12),
+  year: z.number().int().min(2000).max(2100),
+  allocations: z
+    .array(
+      z.object({
+        categoryId: z.string().min(1),
+        amount: z.number().positive("Amount must be greater than zero"),
+      })
+    )
+    .min(1),
+});
+
 export const periodQuerySchema = z.object({
   month: z.coerce.number().int().min(1).max(12),
   year: z.coerce.number().int().min(2000).max(2100),

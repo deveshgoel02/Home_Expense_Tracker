@@ -11,6 +11,7 @@ import { categoriesRouter } from "./routes/categories.js";
 import { expensesRouter } from "./routes/expenses.js";
 import { incomeRouter } from "./routes/income.js";
 import { budgetsRouter } from "./routes/budgets.js";
+import { budgetPlannerRouter } from "./routes/budgetPlanner.js";
 import { dashboardRouter } from "./routes/dashboard.js";
 import { reportsRouter } from "./routes/reports.js";
 import { settingsRouter } from "./routes/settings.js";
@@ -61,6 +62,7 @@ export function createApp() {
   app.use("/api/expenses", expensesRouter);
   app.use("/api/income", incomeRouter);
   app.use("/api/budgets", budgetsRouter);
+  app.use("/api/budget-planner", budgetPlannerRouter);
   app.use("/api/dashboard", dashboardRouter);
   app.use("/api/reports", reportsRouter);
   app.use("/api/settings", settingsRouter);

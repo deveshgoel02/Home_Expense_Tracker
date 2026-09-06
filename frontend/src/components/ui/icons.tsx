@@ -137,6 +137,12 @@ export const Sun = base(
   </>
 );
 export const Moon = base(<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />);
+export const Sparkles = base(
+  <>
+    <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" />
+    <circle cx="12" cy="12" r="2.2" />
+  </>
+);
 export const LogOut = base(
   <>
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

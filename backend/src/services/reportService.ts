@@ -4,15 +4,25 @@ import {
   breakdownByPaymentMethod,
   breakdownByUser,
   compareMonths,
+  computeBudgetPace,
   computeBudgetStatus,
   computeMonthlySummary,
   dailySeries,
   generateAlerts,
+  generateBudgetPaceAlerts,
   generateInsights,
 } from "./calculations.js";
-import { getCategoryNameMap, getMonthExpenses, getMonthIncomes, getSettingsOrDefault, getUserNameMap } from "./dataAccess.js";
+import {
+  getCategoryNameMap,
+  getHistoricalCategoryAverages,
+  getMonthExpenses,
+  getMonthIncomes,
+  getSettingsOrDefault,
+  getUserNameMap,
+} from "./dataAccess.js";
 import { daysInMonth, previousMonth } from "./period.js";
 import { SAFE_USER_SELECT } from "./userService.js";
+import { planBudget, type FixedItem } from "./budgetPlanner.js";
 
 const includeUserAndCategory = { user: { select: SAFE_USER_SELECT }, category: true } as const;
 
@@ -66,6 +76,12 @@ export async function buildDashboard(month: number, year: number) {
     settings.budgetCriticalPercent
   );
 
+  const now = new Date();
+  const isCurrentMonth = now.getMonth() + 1 === month && now.getFullYear() === year;
+  const dayOfMonth = isCurrentMonth ? now.getDate() : daysInMonth(month, year);
+  const budgetPace = computeBudgetPace(budgetStatus, dayOfMonth, daysInMonth(month, year), settings.budgetCriticalPercent);
+  const budgetAlerts = generateBudgetPaceAlerts(budgetPace);
+
   return {
     month,
     year,
@@ -74,10 +90,10 @@ export async function buildDashboard(month: number, year: number) {
     userBreakdown: bundle.userBreakdown,
     paymentMethodBreakdown: bundle.paymentMethodBreakdown,
     daily: bundle.daily,
-    alerts: bundle.alerts,
+    alerts: [...bundle.alerts, ...budgetAlerts],
     insights,
     recentTransactions,
-    budgetStatus,
+    budgetStatus: budgetPace,
     comparison,
   };
 }
@@ -167,4 +183,18 @@ export async function buildMemberReport(userId: string, month: number, year: num
     topCategories: categoryBreakdown.slice(0, 5),
     daily,
   };
+}
+
+export async function buildBudgetPlan(
+  month: number,
+  year: number,
+  incomePaise: number,
+  fixedItems: FixedItem[]
+) {
+  const [categories, historicalAverages] = await Promise.all([
+    prisma.category.findMany({ select: { id: true, name: true } }),
+    getHistoricalCategoryAverages(month, year),
+  ]);
+
+  return planBudget({ incomePaise, fixedItems, categories, historicalAverages });
 }

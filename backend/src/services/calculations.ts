@@ -204,6 +204,56 @@ function formatRupees(paise: number): string {
   return rupees.toLocaleString("en-IN");
 }
 
+export interface BudgetPaceStatus extends BudgetStatus {
+  projectedPaise: number; // actual spend extrapolated to the full month at the current daily rate
+  projectedPercentUsed: number;
+  onPaceToExceed: boolean; // not yet over budget, but projected to be by month end
+}
+
+// dayOfMonth should be the current day for the month being viewed (or the full
+// day count for a month that has already ended, which makes projected == actual).
+export function computeBudgetPace(
+  budgetStatuses: BudgetStatus[],
+  dayOfMonth: number,
+  daysInMonthCount: number,
+  criticalPercent: number
+): BudgetPaceStatus[] {
+  const elapsedDays = Math.min(Math.max(dayOfMonth, 1), daysInMonthCount);
+
+  return budgetStatuses.map((b) => {
+    const projectedPaise = Math.round(b.actualPaise * (daysInMonthCount / elapsedDays));
+    const projectedPercentUsed = percent(projectedPaise, b.budgetPaise);
+    return {
+      ...b,
+      projectedPaise,
+      projectedPercentUsed,
+      onPaceToExceed: b.severity !== "critical" && projectedPercentUsed >= criticalPercent,
+    };
+  });
+}
+
+export function generateBudgetPaceAlerts(paceStatuses: BudgetPaceStatus[]): Alert[] {
+  const alerts: Alert[] = [];
+  for (const b of paceStatuses) {
+    if (b.severity === "critical") {
+      alerts.push({
+        severity: "critical",
+        message: `${b.categoryLabel} budget exceeded — spent ₹${formatRupees(b.actualPaise)} of ₹${formatRupees(
+          b.budgetPaise
+        )} (${b.percentUsed}%).`,
+      });
+    } else if (b.onPaceToExceed) {
+      alerts.push({
+        severity: "warning",
+        message: `${b.categoryLabel} is on pace to exceed its budget by month end — projected ₹${formatRupees(
+          b.projectedPaise
+        )} vs a ₹${formatRupees(b.budgetPaise)} budget.`,
+      });
+    }
+  }
+  return alerts;
+}
+
 export interface MonthComparison {
   current: MonthlySummary;
   previous: MonthlySummary;

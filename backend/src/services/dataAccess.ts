@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { monthRange } from "./period.js";
+import { monthRange, previousMonth } from "./period.js";
 import type { ExpenseLike, IncomeLike, PaymentMethod } from "./calculations.js";
 
 export async function getMonthExpenses(month: number, year: number, userId?: string): Promise<ExpenseLike[]> {
@@ -32,4 +32,26 @@ export async function getSettingsOrDefault() {
   const settings = await prisma.settings.findUnique({ where: { id: "singleton" } });
   if (settings) return settings;
   return prisma.settings.create({ data: { id: "singleton" } });
+}
+
+// Average monthly spend per category over the `monthsBack` months strictly
+// before (month, year) — used to personalize the budget planner's suggestions
+// with the household's actual behavior instead of pure benchmark guesses.
+export async function getHistoricalCategoryAverages(
+  month: number,
+  year: number,
+  monthsBack = 3
+): Promise<Record<string, number>> {
+  const totals = new Map<string, number>();
+  let cursor = { month, year };
+  for (let i = 0; i < monthsBack; i++) {
+    cursor = previousMonth(cursor.month, cursor.year);
+    const expenses = await getMonthExpenses(cursor.month, cursor.year);
+    for (const e of expenses) {
+      totals.set(e.categoryId, (totals.get(e.categoryId) ?? 0) + e.amountPaise);
+    }
+  }
+  const result: Record<string, number> = {};
+  for (const [categoryId, total] of totals) result[categoryId] = Math.round(total / monthsBack);
+  return result;
 }

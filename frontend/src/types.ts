@@ -117,6 +117,11 @@ export interface BudgetStatus {
   remainingPaise: number;
   percentUsed: number;
   severity: AlertSeverity;
+  // Present when the dashboard computed month-end projections (current month only
+  // in practice, but harmless for any month — see backend computeBudgetPace).
+  projectedPaise?: number;
+  projectedPercentUsed?: number;
+  onPaceToExceed?: boolean;
 }
 
 export interface MonthComparison {
@@ -172,6 +177,35 @@ export interface MemberReport {
   changeFromPreviousMonthPercent: number;
   topCategories: BreakdownItem[];
   daily: DailyPoint[];
+}
+
+export type BudgetPlanGroup = "fixed" | "essential" | "discretionary";
+
+export interface FixedExpenseInput {
+  label: string;
+  amount: number;
+  categoryId?: string | null;
+}
+
+export interface BudgetPlanCategory {
+  categoryId: string;
+  categoryName: string;
+  group: BudgetPlanGroup;
+  suggestedPaise: number;
+  benchmarkPercentOfIncome: number;
+  historicalAveragePaise: number;
+}
+
+export interface BudgetPlan {
+  incomePaise: number;
+  fixedTotalPaise: number;
+  needsTargetPaise: number;
+  wantsTargetPaise: number;
+  savingsTargetPaise: number;
+  savingsRatePercent: number;
+  categories: BudgetPlanCategory[];
+  warnings: string[];
+  framework: string;
 }
 
 export interface Settings {

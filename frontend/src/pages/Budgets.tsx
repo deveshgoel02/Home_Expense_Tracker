@@ -13,8 +13,9 @@ import { ProgressBar } from "../components/ui/ProgressBar";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Skeleton } from "../components/ui/Skeleton";
 import { Badge } from "../components/ui/Badge";
-import { PiggyBank, Plus, Edit, Trash } from "../components/ui/icons";
+import { PiggyBank, Plus, Edit, Sparkles, Trash } from "../components/ui/icons";
 import { formatPaise } from "../lib/format";
+import { Link } from "react-router-dom";
 import type { Budget } from "../types";
 
 export default function Budgets() {
@@ -78,6 +79,11 @@ export default function Budgets() {
               setYear(y);
             }}
           />
+          <Link to="/budget-planner">
+            <Button type="button" variant="secondary">
+              <Sparkles className="h-4 w-4" /> Budget Planner
+            </Button>
+          </Link>
           <Button onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4" /> Add Budget
           </Button>
