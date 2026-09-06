@@ -1,24 +1,21 @@
 # Deploying to Render (backend) + Vercel (frontend)
 
-This repo is preconfigured so both deploys are mostly point-and-click. Do the backend
-first — the frontend needs its URL.
+This repo is preconfigured so both deploys are mostly point-and-click. Do the database
+and backend first — the frontend needs the backend's URL.
 
-## ⚠️ Important: SQLite storage on Render's free tier is ephemeral
+## Part 0 — Database on Neon
 
-The app uses SQLite (see README.md § 1 for why). Render's **free** web service plan
-does not include a persistent disk, so the database file — including logins,
-passwords, and every family member you've added — is reset to empty **every time you
-redeploy** (push a new commit, or manually redeploy). Within a single running instance
-your data is safe; it only resets on a fresh deploy.
+The app needs a PostgreSQL database. [Neon](https://neon.tech) has a free tier that
+persists indefinitely (unlike Render's own free Postgres, which is deleted after 30
+days) and scales to zero when idle.
 
-This is fine for trying the app out today, but it means you'll need to re-run the
-bootstrap step (Part 1, step 7) after every deploy until you move off the free tier.
-Before the family relies on this for real, do **one** of the following:
-- Upgrade the Render service to a paid plan and attach a **Persistent Disk** mounted
-  at `backend/prisma` (Render dashboard → your service → Disks), or
-- Switch to a free hosted Postgres (e.g. Neon, Supabase, or Render's own Postgres) —
-  see README.md § 6 "Switching to PostgreSQL". Come back and ask for help wiring this
-  up once you have a Postgres connection string; it's a small change.
+1. Go to [neon.tech](https://neon.tech), sign in, and create a project. **Pick the
+   same region your Render backend will run in** (Render's default is Oregon/US West —
+   matching regions avoids real cross-country latency on every request).
+2. Open the project's **Connect** dialog. Copy the connection string shown — this is
+   your pooled connection (`DATABASE_URL`). Toggle **Connection pooling** off to reveal
+   the direct connection string (`DIRECT_URL`) — same password, host without the
+   `-pooler` suffix. You'll paste both into Render in Part 1.
 
 ## Part 1 — Backend on Render
 
@@ -28,7 +25,8 @@ Before the family relies on this for real, do **one** of the following:
 3. Pick the `deveshgoel02/Home_Expense_Tracker` repository. Render will detect the
    `render.yaml` file at the repo root and pre-fill everything (service name, build
    command, start command, health check). `JWT_SECRET` and `BOOTSTRAP_SECRET` are
-   auto-generated for you; leave `FRONTEND_URL` blank for now — you'll set it in Part 3.
+   auto-generated for you; leave `FRONTEND_URL` blank for now (Part 3). Paste the
+   `DATABASE_URL` and `DIRECT_URL` values from Part 0 when prompted.
 4. Click **Apply** / **Create**. Render will build and deploy — this takes a minute or
    so (it runs `npm install`, `prisma generate`, `prisma migrate deploy`, then builds
    the TypeScript).
@@ -47,6 +45,8 @@ Before the family relies on this for real, do **one** of the following:
    save these now, they are never shown again. Each person should sign in with their
    temporary password and will be prompted to set their own immediately. This endpoint
    safely refuses to run again once any user exists, so it's fine to leave configured.
+   Unlike SQLite on Render's free tier, this data lives in Neon and survives every
+   future redeploy — you only run this once.
 
 ## Part 2 — Frontend on Vercel
 
@@ -77,9 +77,8 @@ Before the family relies on this for real, do **one** of the following:
    cookies aren't marked `Secure`/`SameSite=None` and cross-site login from Vercel to
    Render will silently fail). It's already in `render.yaml` for a fresh Blueprint
    deploy.
-4. Save — Render will automatically redeploy with the new values (and, per the
-   ephemeral-storage warning above, this wipes the database — re-run the bootstrap
-   step from Part 1 afterward).
+4. Save — Render will automatically redeploy with the new value. Your Neon database
+   is untouched by this (or any future) redeploy — no need to re-run bootstrap.
 5. Once that finishes, reload your Vercel URL and sign in with one of the temporary
    passwords from the bootstrap step.
 
@@ -90,13 +89,9 @@ be set explicitly.
 
 ## Redeploying after future code changes
 
-Both platforms auto-deploy on every push to `main` by default — just
-`git push` and both will rebuild. Because of the ephemeral-storage caveat above,
-**every backend redeploy wipes the database** — re-run the bootstrap `curl` command
-from Part 1, step 6 afterward, and let the family know their old temporary passwords
-no longer work (their real, chosen passwords are safe as long as no redeploy happened
-since they set them — but on the free tier, plan for this being genuinely temporary
-until you move to persistent storage).
+Both platforms auto-deploy on every push to `main` by default — just `git push` and
+both will rebuild. Data in Neon persists across every redeploy, so there's no bootstrap
+step to re-run — family members' real passwords keep working.
 
 ## Troubleshooting
 
@@ -105,17 +100,20 @@ until you move to persistent storage).
   slash after that) and `FRONTEND_URL` on Render (must exactly match your Vercel
   domain, no trailing slash).
 - **Login screen shows no family members**: the database hasn't been bootstrapped yet
-  (or was wiped by a redeploy) — run the `curl` command from Part 1, step 6.
+  — run the `curl` command from Part 1, step 6.
 - **Render build fails with `TS7016: Could not find a declaration file for module`**:
   `NODE_ENV=production` makes `npm install` skip devDependencies (which includes the
   `@types/*` packages TypeScript needs to compile). The `render-build` script already
   uses `npm install --include=dev` to force them in — if you changed that script,
   restore the `--include=dev` flag.
 - **Render build fails on `prisma migrate deploy`**: check the build logs — this
-  usually means `DATABASE_URL` isn't set. It should be pre-filled from `render.yaml`;
-  if you clicked through the Blueprint wizard it should already be there.
+  usually means `DATABASE_URL` or `DIRECT_URL` isn't set, or the Neon project was
+  deleted/suspended. Both should be pre-filled from Part 0/1; check the service's
+  **Environment** tab.
 - **Login works locally but not on the deployed site**: check `NODE_ENV=production` is
   set on Render (see Part 3, step 3) — without it, the session cookie won't survive
   the cross-site request from your Vercel domain to your Render domain.
-- **All my data disappeared after a redeploy**: expected on Render's free plan — see
-  the warning at the top of this file. Re-run the bootstrap step.
+- **Dashboard feels slow**: check your Neon project's region matches your Render
+  service's region (Render dashboard → service → Settings). A cross-country round trip
+  on every query adds real, noticeable latency — recreate the Neon project in the
+  matching region if they differ.

@@ -20,20 +20,22 @@ dependent the household is on credit cards — with a modern, fintech-style dash
 **Backend**
 - Node.js + TypeScript + Express
 - Prisma ORM
-- SQLite (see note below on database choice)
+- PostgreSQL, hosted on [Neon](https://neon.tech) (see note below on database choice)
 - Zod for request validation
 - Vitest + Supertest for testing
 
-**Database: SQLite instead of PostgreSQL**
+**Database: PostgreSQL on Neon**
 
-The project brief suggested PostgreSQL, but this machine has neither PostgreSQL nor
-Docker installed, and requiring the family to install and configure a database server
-would work against the "keep it simple" goal of a small household app. SQLite is a
-single embedded file, requires zero setup, and Prisma's schema/migration/query API is
-nearly identical across both databases. All financial calculations happen in a
-database-agnostic service layer (`backend/src/services/calculations.ts`), so switching
-to PostgreSQL later is a small, low-risk change (see "Switching to PostgreSQL" below) —
-nothing about the business logic depends on SQLite.
+Money and family data need to survive redeploys, so the app uses a real managed
+Postgres database rather than a local file. [Neon](https://neon.tech)'s free tier
+persists indefinitely (unlike Render's own free Postgres, which is deleted after 30
+days), scales to zero when idle, and is encrypted at rest. Prisma is configured with
+two connection strings (`backend/prisma/schema.prisma`): `DATABASE_URL`, a pooled
+connection (via Neon's built-in PgBouncer) used for normal app queries, and
+`DIRECT_URL`, an unpooled connection used only by `prisma migrate` (schema-change
+statements aren't compatible with connection pooling). All financial calculations
+happen in a database-agnostic service layer (`backend/src/services/calculations.ts`),
+so nothing about the business logic is Postgres-specific.
 
 **Authentication: real per-member login, deliberately family-scale**
 
@@ -91,8 +93,8 @@ Requires Node.js 18+ (tested on Node 24) and npm.
 # From the project root
 cd backend
 npm install
-cp .env.example .env      # already done for you; edit if needed
-npm run db:migrate        # creates dev.db and applies the schema
+cp .env.example .env      # edit DATABASE_URL/DIRECT_URL to point at your own Postgres (e.g. a free Neon project)
+npm run db:migrate        # applies the schema
 npm run db:seed           # loads the 6 family members + ~4 months of realistic demo data
 
 cd ../frontend
@@ -123,17 +125,22 @@ requests to the backend automatically, so no extra configuration is needed.
 **backend/.env**
 | Variable | Purpose | Default |
 |---|---|---|
-| `DATABASE_URL` | Prisma connection string | `file:./dev.db` (SQLite) |
+| `DATABASE_URL` | Prisma pooled connection string (Neon/PgBouncer) | — (required) |
+| `DIRECT_URL` | Prisma unpooled connection string, used only by migrations | — (required) |
 | `PORT` | API port | `4000` |
 | `FRONTEND_URL` | Allowed CORS origin | `http://localhost:5173` |
+| `JWT_SECRET` | Signs login session tokens | — (required) |
+| `BOOTSTRAP_SECRET` | One-time header to seed a brand-new empty database | — (required) |
 
 **frontend/.env**
 | Variable | Purpose | Default |
 |---|---|---|
 | `VITE_API_URL` | Base URL the frontend calls | `/api` (proxied in dev) |
 
-No secrets are required to run this application locally — there are no third-party API
-keys or credentials involved.
+`DATABASE_URL`/`DIRECT_URL` need a Postgres instance — a free
+[Neon](https://neon.tech) project takes under a minute to create and gives you both
+connection strings from its "Connect" dialog (toggle "Connection pooling" off to get
+the direct one).
 
 ## 6. Database Setup & Migrations
 
@@ -143,14 +150,6 @@ npm run db:migrate       # apply schema changes (creates a new migration if the 
 npm run db:seed          # (re)populate demo data — safe to re-run, it wipes and reseeds
 npm run db:reset         # drop everything, reapply all migrations, and reseed
 ```
-
-### Switching to PostgreSQL
-
-1. In `backend/prisma/schema.prisma`, change `provider = "sqlite"` to `provider = "postgresql"`.
-2. Set `DATABASE_URL` in `backend/.env` to a Postgres connection string.
-3. Run `npm run db:migrate` again to generate Postgres-specific migrations.
-
-The application code needs no other changes — all money/date logic is database-agnostic.
 
 ## 7. Testing
 
@@ -191,8 +190,8 @@ including a `render.yaml` blueprint and `vercel.json` already in this repo — s
 
 - The backend is a standard Node/Express app — deploy `backend/dist` behind any Node
   host (a VPS, Railway, Render, etc.) after running `npm run build`. Set `DATABASE_URL`
-  to a persistent file path (SQLite) or a managed PostgreSQL instance (see above) and
-  set `FRONTEND_URL` to your deployed frontend's origin for CORS.
+  / `DIRECT_URL` to a managed PostgreSQL instance (see above) and set `FRONTEND_URL` to
+  your deployed frontend's origin for CORS.
 - The frontend is a static Vite build (`frontend/dist`) — deploy it to any static host
   (Netlify, Vercel, S3+CloudFront, etc.) and set `VITE_API_URL` to your backend's public
   URL at build time.
