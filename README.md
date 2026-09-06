@@ -35,15 +35,23 @@ database-agnostic service layer (`backend/src/services/calculations.ts`), so swi
 to PostgreSQL later is a small, low-risk change (see "Switching to PostgreSQL" below) —
 nothing about the business logic depends on SQLite.
 
-**Authentication: simple "who are you" session, not full auth**
+**Authentication: real per-member login, deliberately family-scale**
 
-With exactly 6 known family members and no need to protect data from each other, the
-app uses a lightweight client-side "Using as" selector (stored in the browser's
-`localStorage`) instead of passwords/JWTs/sessions. It pre-fills "who spent this" when
-adding an expense. This avoids enterprise auth complexity that a real family would
-never need, per the project brief's guidance. All financial data is otherwise treated
-as shared household information, matching how the app is meant to be used (one device
-at a time, on the family's own network).
+Every family member has their own password. Login issues a signed session (JWT) in an
+httpOnly, Secure cookie — every API route except `/api/health` and `/api/auth/login`
+requires a valid session, and passwords are bcrypt-hashed (never stored or returned in
+plain text; every response was audited to make sure a password hash never reaches the
+frontend). New members can be added from **Settings → Family Members**, which issues a
+one-time generated temporary password shown once and never again. A first login (or a
+newly added member) is required to set their own password before doing anything else.
+
+This is intentionally *not* enterprise auth — there are no roles/permissions beyond
+"signed in or not" (any family member can add expenses, add other members, etc.), no
+email verification, and no password reset flow (an admin/other member can be asked to
+add you again, or you can be helped to reset your password directly in the database).
+For a private household app with a handful of trusted users, that trade-off is the
+right one; see § 25 for the rest of the security posture (rate limiting, security
+headers, input validation).
 
 ## 2. Folder Structure
 
@@ -222,9 +230,13 @@ including a `render.yaml` blueprint and `vercel.json` already in this repo — s
   complexity, per the project brief ("do not allow a complicated export implementation
   to block the core application"). CSV export is fully implemented for expenses.
 - No CSV *import* (only export) — not required by the spec's core phases.
-- The "who are you" session is a convenience default for the Add Expense form, not an
-  access-control mechanism — anyone with access to the app can see and edit all data,
-  which matches how a single shared family device/app is actually used.
+- Once signed in, every family member has equal access — there are no roles or
+  permissions beyond "logged in or not" (see § 1 "Authentication" for why this is
+  the right trade-off at this scale). Anyone signed in can see and edit all financial
+  data, add other members, and change budgets/thresholds.
+- No password-reset email flow — if someone forgets their password, another signed-in
+  member can't reset it for them from the UI today; ask for help resetting it directly
+  in the database, or add them again under a slightly different name as a workaround.
 
 ## 12. Next Steps For You
 
