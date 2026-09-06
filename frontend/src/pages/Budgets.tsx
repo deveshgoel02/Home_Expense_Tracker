@@ -66,8 +66,8 @@ export default function Budgets() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Budgets</h1>
-          <p className="text-sm text-slate-500">Set monthly spending limits per category and track how close you are.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Budgets</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Set monthly spending limits per category and track how close you are.</p>
         </div>
         <div className="flex items-center gap-3">
           <MonthSelector
@@ -119,10 +119,16 @@ export default function Budgets() {
                   title={budget.category.name}
                   action={
                     <div className="flex items-center gap-1">
-                      <button onClick={() => openEdit(budget)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                      <button
+                        onClick={() => openEdit(budget)}
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                      >
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button onClick={() => setDeleting(budget)} className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600">
+                      <button
+                        onClick={() => setDeleting(budget)}
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                      >
                         <Trash className="h-4 w-4" />
                       </button>
                     </div>
@@ -130,10 +136,10 @@ export default function Budgets() {
                 />
                 <ProgressBar percent={percent} tone={tone} />
                 <div className="mt-2 flex items-center justify-between text-sm">
-                  <span className="text-slate-500">
+                  <span className="text-slate-500 dark:text-slate-400">
                     {formatPaise(spent)} of {formatPaise(budget.amountPaise)}
                   </span>
-                  <span className="font-semibold text-slate-800">{percent}%</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{percent}%</span>
                 </div>
                 {percent >= 80 && (
                   <Badge tone={percent >= 100 ? "red" : "amber"} className="mt-3">
@@ -142,7 +148,7 @@ export default function Budgets() {
                       : `${budget.category.name} budget is ${percent}% used`}
                   </Badge>
                 )}
-                <p className="mt-2 text-xs text-slate-400">
+                <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
                   {spent > budget.amountPaise
                     ? `${formatPaise(spent - budget.amountPaise)} over budget`
                     : `${formatPaise(budget.amountPaise - spent)} remaining`}

@@ -10,7 +10,7 @@ export function ProgressBar({ percent, tone = "brand" }: { percent: number; tone
   }[tone];
 
   return (
-    <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+    <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
       <div className={clsx("h-full rounded-full transition-all", toneClasses)} style={{ width: `${clamped}%` }} />
     </div>
   );

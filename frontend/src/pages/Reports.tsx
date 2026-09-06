@@ -23,8 +23,8 @@ export default function Reports() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Monthly Report</h1>
-          <p className="text-sm text-slate-500">A complete financial picture for the selected month.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Monthly Report</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">A complete financial picture for the selected month.</p>
         </div>
         <div className="flex items-center gap-3">
           <MonthSelector
@@ -62,7 +62,7 @@ export default function Reports() {
             <SummaryTile
               label="Savings"
               value={formatPaise(data.summary.savingsPaise)}
-              tone={data.summary.savingsPaise < 0 ? "text-red-600" : "text-emerald-600"}
+              tone={data.summary.savingsPaise < 0 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}
             />
             <SummaryTile label="Credit Card" value={formatPaise(data.summary.creditCardPaise)} />
           </div>
@@ -134,9 +134,9 @@ export default function Reports() {
 
 function SummaryTile({ label, value, tone }: { label: string; value: string; tone?: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className={`mt-1 text-lg font-bold ${tone ?? "text-slate-900"}`}>{value}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900">
+      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
+      <p className={`mt-1 text-lg font-bold ${tone ?? "text-slate-900 dark:text-slate-100"}`}>{value}</p>
     </div>
   );
 }
@@ -154,9 +154,13 @@ function ComparisonRow({
 }) {
   const isGoodDirection = inverse ? changePaise <= 0 : changePaise >= 0;
   return (
-    <div className="rounded-xl bg-slate-50 px-4 py-3">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className={`mt-1 text-sm font-semibold ${isGoodDirection ? "text-emerald-600" : "text-red-600"}`}>
+    <div className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
+      <p
+        className={`mt-1 text-sm font-semibold ${
+          isGoodDirection ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+        }`}
+      >
         {changePaise >= 0 ? "+" : "-"}
         {formatPaise(Math.abs(changePaise))} ({changePercent >= 0 ? "+" : ""}
         {changePercent}%)

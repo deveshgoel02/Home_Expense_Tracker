@@ -8,14 +8,15 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Field";
 import { Badge } from "../components/ui/Badge";
 import { Skeleton } from "../components/ui/Skeleton";
+import { ThemeToggle } from "../components/layout/ThemeToggle";
 import { formatPaise } from "../lib/format";
 
 export default function SettingsPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-        <p className="text-sm text-slate-500">Manage family members, categories, and alert thresholds.</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Settings</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Manage family members, categories, and alert thresholds.</p>
       </div>
 
       <FamilyMembersSection />
@@ -48,7 +49,7 @@ function FamilyMembersSection() {
       {isLoading ? (
         <Skeleton className="h-32 w-full" />
       ) : (
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
           {users.map((user) => (
             <div key={user.id} className="flex items-center justify-between gap-3 py-3">
               <div className="flex items-center gap-3">
@@ -59,8 +60,10 @@ function FamilyMembersSection() {
                   {user.initials}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{user.name}</p>
-                  <p className="text-xs text-slate-400">Added {new Date(user.createdAt).toLocaleDateString("en-IN")}</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{user.name}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                    Added {new Date(user.createdAt).toLocaleDateString("en-IN")}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -216,7 +219,7 @@ function ThresholdsSection() {
         </div>
       </form>
       {settings && (
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
           Current credit card warning: {formatPaise(settings.creditCardWarningPaise)}
         </p>
       )}
@@ -228,11 +231,14 @@ function CurrencySection() {
   return (
     <Card>
       <CardHeader title="Currency & Preferences" />
-      <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
-        <span className="text-sm font-medium text-slate-600">Currency</span>
-        <span className="text-sm font-semibold text-slate-900">Indian Rupee (₹ INR)</span>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Currency</span>
+          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">Indian Rupee (₹ INR)</span>
+        </div>
+        <ThemeToggle className="flex w-full items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700" />
       </div>
-      <p className="mt-3 text-xs text-slate-400">
+      <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
         This application is built specifically for the family's use in India and always formats amounts using Indian number
         grouping (e.g. ₹1,25,000).
       </p>

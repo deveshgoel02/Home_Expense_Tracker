@@ -54,14 +54,14 @@ export function ExpenseFilters({ filters, onChange }: ExpenseFiltersProps) {
     <div className="space-y-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && update({ search })}
             onBlur={() => update({ search })}
             placeholder="Search description or notes..."
-            className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+            className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-brand-900/40"
           />
         </div>
         <div className="flex gap-2">
@@ -84,7 +84,9 @@ export function ExpenseFilters({ filters, onChange }: ExpenseFiltersProps) {
               key={label}
               onClick={() => applyShortcut(range)}
               className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                isShortcutActive(range) ? "border-brand-500 bg-brand-50 text-brand-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                isShortcutActive(range)
+                  ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400"
+                  : "border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               }`}
             >
               {label}
@@ -94,7 +96,7 @@ export function ExpenseFilters({ filters, onChange }: ExpenseFiltersProps) {
         {(filters.dateFrom || filters.dateTo) && (
           <button
             onClick={() => update({ dateFrom: undefined, dateTo: undefined })}
-            className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50"
+            className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
           >
             Clear dates
           </button>
@@ -102,7 +104,7 @@ export function ExpenseFilters({ filters, onChange }: ExpenseFiltersProps) {
       </div>
 
       {showAdvanced && (
-        <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-4 dark:border-slate-700 dark:bg-slate-800/50">
           <Select label="Person" value={filters.userId ?? ""} onChange={(e) => update({ userId: e.target.value || undefined })}>
             <option value="">All</option>
             {users.map((u) => (

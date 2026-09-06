@@ -14,7 +14,7 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({ open, title, message, confirmLabel = "Confirm", isLoading, onConfirm, onCancel }: ConfirmDialogProps) {
   return (
     <Modal open={open} onClose={onCancel} title={title} maxWidth="max-w-sm">
-      <p className="text-sm text-slate-600">{message}</p>
+      <p className="text-sm text-slate-600 dark:text-slate-300">{message}</p>
       <div className="mt-5 flex justify-end gap-3">
         <Button variant="secondary" onClick={onCancel}>
           Cancel

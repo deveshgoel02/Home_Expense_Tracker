@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import App from "./App";
 import { CurrentUserProvider } from "./context/CurrentUserContext";
 import { AddExpenseModalProvider } from "./context/AddExpenseModalContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -19,15 +20,17 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <CurrentUserProvider>
-          <AddExpenseModalProvider>
-            <App />
-            <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-          </AddExpenseModalProvider>
-        </CurrentUserProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <CurrentUserProvider>
+            <AddExpenseModalProvider>
+              <App />
+              <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+            </AddExpenseModalProvider>
+          </CurrentUserProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

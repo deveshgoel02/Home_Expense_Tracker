@@ -22,10 +22,12 @@ export function PaymentMethodBreakdown({ data }: { data: BreakdownItem[] }) {
         return (
           <li key={item.key}>
             <div className="mb-1 flex items-center justify-between text-sm">
-              <span className={isCredit ? "font-medium text-amber-700" : "font-medium text-slate-700"}>{labelFor(item.key)}</span>
-              <span className="font-semibold text-slate-900">{formatPaise(item.amountPaise)}</span>
+              <span className={isCredit ? "font-medium text-amber-700 dark:text-amber-400" : "font-medium text-slate-700 dark:text-slate-300"}>
+                {labelFor(item.key)}
+              </span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">{formatPaise(item.amountPaise)}</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
               <div
                 className={`h-full rounded-full ${isCredit ? "bg-amber-500" : "bg-brand-500"}`}
                 style={{ width: `${item.percentOfTotal}%` }}

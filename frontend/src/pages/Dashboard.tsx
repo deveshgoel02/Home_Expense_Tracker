@@ -25,8 +25,8 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-sm text-slate-500">Your family's financial snapshot for {monthLabel(month, year)}</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Dashboard</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Your family's financial snapshot for {monthLabel(month, year)}</p>
         </div>
         <MonthSelector
           month={month}
@@ -39,7 +39,9 @@ export default function Dashboard() {
       </div>
 
       {isError && (
-        <Card className="border-red-200 bg-red-50 text-red-700">Failed to load dashboard: {error?.message}</Card>
+        <Card className="border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
+          Failed to load dashboard: {error?.message}
+        </Card>
       )}
 
       {isLoading && (
@@ -56,36 +58,36 @@ export default function Dashboard() {
             <StatCard
               label="Total Income"
               value={formatPaise(data.summary.totalIncomePaise)}
-              icon={<Wallet className="h-5 w-5 text-brand-600" />}
-              iconBg="bg-brand-50"
+              icon={<Wallet className="h-5 w-5 text-brand-600 dark:text-brand-400" />}
+              iconBg="bg-brand-50 dark:bg-brand-500/10"
             />
             <StatCard
               label="Total Expenses"
               value={formatPaise(data.summary.totalExpensePaise)}
-              icon={<Receipt className="h-5 w-5 text-slate-600" />}
-              iconBg="bg-slate-100"
+              icon={<Receipt className="h-5 w-5 text-slate-600 dark:text-slate-300" />}
+              iconBg="bg-slate-100 dark:bg-slate-800"
               changePercent={data.comparison.expenseChangePercent}
               changeLabel="vs last month"
             />
             <StatCard
               label={data.summary.remainingPaise >= 0 ? "Remaining Balance" : "Overspent By"}
               value={formatPaise(Math.abs(data.summary.remainingPaise))}
-              icon={<PiggyBank className="h-5 w-5 text-emerald-600" />}
-              iconBg="bg-emerald-50"
+              icon={<PiggyBank className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />}
+              iconBg="bg-emerald-50 dark:bg-emerald-500/10"
               tone={data.summary.remainingPaise < 0 ? "danger" : "default"}
             />
             <StatCard
               label="Savings"
               value={formatPaise(data.summary.savingsPaise)}
-              icon={<CheckCircle className="h-5 w-5 text-emerald-600" />}
-              iconBg="bg-emerald-50"
+              icon={<CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />}
+              iconBg="bg-emerald-50 dark:bg-emerald-500/10"
               tone={data.summary.savingsPaise < 0 ? "danger" : "default"}
             />
             <StatCard
               label="Credit Card Spending"
               value={formatPaise(data.summary.creditCardPaise)}
-              icon={<CreditCard className="h-5 w-5 text-amber-600" />}
-              iconBg="bg-amber-50"
+              icon={<CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400" />}
+              iconBg="bg-amber-50 dark:bg-amber-500/10"
               changePercent={data.comparison.creditCardChangePercent}
               changeLabel="vs last month"
             />
@@ -97,7 +99,7 @@ export default function Dashboard() {
               subtitle={`${formatPaise(data.summary.totalExpensePaise)} of ${formatPaise(data.summary.totalIncomePaise)} income used`}
             />
             <ProgressBar percent={data.summary.expenseRatioPercent} tone={toneForPercent(data.summary.expenseRatioPercent)} />
-            <p className="mt-2 text-sm font-medium text-slate-600">{data.summary.expenseRatioPercent}% used</p>
+            <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">{data.summary.expenseRatioPercent}% used</p>
           </Card>
 
           {data.alerts.length > 0 && (
@@ -129,8 +131,8 @@ export default function Dashboard() {
               <CardHeader title="Insights" subtitle="Automatically generated from this month's data" />
               <ul className="space-y-2">
                 {data.insights.map((insight, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
-                    <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-500" />
+                  <li key={idx} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                    <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-500 dark:bg-brand-400" />
                     {insight}
                   </li>
                 ))}
@@ -139,7 +141,14 @@ export default function Dashboard() {
           )}
 
           <Card>
-            <CardHeader title="Recent Transactions" action={<Link to="/expenses" className="text-sm font-medium text-brand-600 hover:underline">View all</Link>} />
+            <CardHeader
+              title="Recent Transactions"
+              action={
+                <Link to="/expenses" className="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">
+                  View all
+                </Link>
+              }
+            />
             {data.recentTransactions.length === 0 ? (
               <EmptyState icon={<Receipt className="h-8 w-8" />} title="No expenses recorded today." />
             ) : (

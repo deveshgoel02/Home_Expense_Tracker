@@ -41,7 +41,7 @@ export function TransactionRow({ expense, showActions = true }: { expense: Expen
 
   return (
     <>
-      <div className="flex items-center gap-3 border-b border-slate-100 px-1 py-3 last:border-0">
+      <div className="flex items-center gap-3 border-b border-slate-100 px-1 py-3 last:border-0 dark:border-slate-800">
         <div
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
           style={{ backgroundColor: expense.user.color }}
@@ -50,38 +50,38 @@ export function TransactionRow({ expense, showActions = true }: { expense: Expen
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="truncate text-sm font-medium text-slate-900">{expense.description}</p>
+            <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{expense.description}</p>
             {expense.paymentMethod === "CREDIT_CARD" && (
               <Badge tone="amber" className="flex-shrink-0">
                 Credit
               </Badge>
             )}
           </div>
-          <p className="truncate text-xs text-slate-500">
+          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
             {expense.category.name} · {expense.user.name} · {relativeDay(expense.date)} · {paymentLabel(expense.paymentMethod)}
           </p>
         </div>
         <div className="flex flex-shrink-0 items-center gap-3">
-          <p className="text-sm font-semibold text-slate-900">{formatPaise(expense.amountPaise)}</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{formatPaise(expense.amountPaise)}</p>
           {showActions && (
             <div className="flex items-center gap-1">
               <button
                 onClick={handleDuplicate}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                 aria-label="Duplicate expense"
               >
                 <Copy className="h-4 w-4" />
               </button>
               <button
                 onClick={() => open(expense)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                 aria-label="Edit expense"
               >
                 <Edit className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setConfirmingDelete(true)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
                 aria-label="Delete expense"
               >
                 <Trash className="h-4 w-4" />

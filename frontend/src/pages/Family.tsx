@@ -31,8 +31,8 @@ export default function Family() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Family</h1>
-        <p className="text-sm text-slate-500">Household members and their individual spending this month.</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Family</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Household members and their individual spending this month.</p>
       </div>
 
       {isLoading && (
@@ -55,20 +55,23 @@ export default function Family() {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="truncate font-semibold text-slate-900">{user.name}</p>
+                  <p className="truncate font-semibold text-slate-900 dark:text-slate-100">{user.name}</p>
                   {!user.isActive && <Badge tone="slate">Inactive</Badge>}
                 </div>
-                <p className="text-sm text-slate-500">{formatPaise(spendByUser.get(user.id) ?? 0)} this month</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{formatPaise(spendByUser.get(user.id) ?? 0)} this month</p>
               </div>
             </Link>
             <div className="flex flex-shrink-0 items-center gap-2">
               <button
                 onClick={() => toggleActive(user.id, user.isActive)}
-                className="text-xs font-medium text-slate-400 hover:text-slate-600"
+                className="text-xs font-medium text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
               >
                 {user.isActive ? "Deactivate" : "Activate"}
               </button>
-              <Link to={`/family/${user.id}`} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+              <Link
+                to={`/family/${user.id}`}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+              >
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </div>

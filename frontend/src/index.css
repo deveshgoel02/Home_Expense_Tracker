@@ -9,7 +9,7 @@ html {
 }
 
 body {
-  @apply bg-slate-50 text-slate-900;
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
 }
 
 * {
@@ -23,4 +23,20 @@ body {
 ::-webkit-scrollbar-thumb {
   background-color: rgb(203 213 225);
   border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgb(71 85 105);
+}
+
+/* Printed reports always render in light mode, regardless of the viewer's theme. */
+@media print {
+  html.dark {
+    color-scheme: light;
+  }
+  html.dark body,
+  html.dark body * {
+    background-color: white !important;
+    color: black !important;
+    border-color: rgb(226 232 240) !important;
+  }
 }

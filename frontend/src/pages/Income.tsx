@@ -52,8 +52,8 @@ export default function Income() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Income</h1>
-          <p className="text-sm text-slate-500">Track how much the family earns each month.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Income</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Track how much the family earns each month.</p>
         </div>
         <div className="flex items-center gap-3">
           <MonthSelector
@@ -72,8 +72,8 @@ export default function Income() {
 
       <Card>
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-sm font-medium text-slate-500">Total Family Income — {monthLabel(month, year)}</p>
-          <p className="text-xl font-bold text-slate-900">{formatPaise(total)}</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Family Income — {monthLabel(month, year)}</p>
+          <p className="text-xl font-bold text-slate-900 dark:text-slate-100">{formatPaise(total)}</p>
         </div>
 
         {isLoading && (
@@ -97,21 +97,24 @@ export default function Income() {
         )}
 
         {!isLoading && incomes.length > 0 && (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {incomes.map((income) => (
               <div key={income.id} className="flex items-center justify-between gap-3 py-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-slate-900">{income.source}</p>
-                  <p className="text-xs text-slate-500">{income.user ? income.user.name : "Family / Other"}</p>
+                  <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{income.source}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{income.user ? income.user.name : "Family / Other"}</p>
                 </div>
                 <div className="flex flex-shrink-0 items-center gap-3">
-                  <p className="text-sm font-semibold text-slate-900">{formatPaise(income.amountPaise)}</p>
-                  <button onClick={() => openEdit(income)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{formatPaise(income.amountPaise)}</p>
+                  <button
+                    onClick={() => openEdit(income)}
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                  >
                     <Edit className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setDeleting(income)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
                   >
                     <Trash className="h-4 w-4" />
                   </button>

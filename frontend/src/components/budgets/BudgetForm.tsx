@@ -40,7 +40,7 @@ export function BudgetForm({ month, year, existingCategoryIds, onDone }: BudgetF
   }
 
   if (availableCategories.length === 0) {
-    return <p className="text-sm text-slate-500">All categories already have a budget for this month.</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">All categories already have a budget for this month.</p>;
   }
 
   return (

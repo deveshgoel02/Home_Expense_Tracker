@@ -24,18 +24,22 @@ export function MonthSelector({ month, year, onChange }: MonthSelectorProps) {
   }
 
   return (
-    <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1">
-      <button onClick={() => shift(-1)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100" aria-label="Previous month">
+    <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900">
+      <button
+        onClick={() => shift(-1)}
+        className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+        aria-label="Previous month"
+      >
         <ChevronDown className="h-4 w-4 rotate-90" />
       </button>
       <div className="relative flex items-center gap-1 px-1">
         <select
           value={month}
           onChange={(e) => onChange(Number(e.target.value), year)}
-          className="cursor-pointer appearance-none bg-transparent pr-1 text-sm font-semibold text-slate-800 focus:outline-none"
+          className="cursor-pointer appearance-none bg-transparent pr-1 text-sm font-semibold text-slate-800 focus:outline-none dark:text-slate-200"
         >
           {MONTH_NAMES.map((name, idx) => (
-            <option key={name} value={idx + 1}>
+            <option key={name} value={idx + 1} className="text-slate-900">
               {name}
             </option>
           ))}
@@ -43,16 +47,20 @@ export function MonthSelector({ month, year, onChange }: MonthSelectorProps) {
         <select
           value={year}
           onChange={(e) => onChange(month, Number(e.target.value))}
-          className="cursor-pointer appearance-none bg-transparent text-sm font-semibold text-slate-800 focus:outline-none"
+          className="cursor-pointer appearance-none bg-transparent text-sm font-semibold text-slate-800 focus:outline-none dark:text-slate-200"
         >
           {years.map((y) => (
-            <option key={y} value={y}>
+            <option key={y} value={y} className="text-slate-900">
               {y}
             </option>
           ))}
         </select>
       </div>
-      <button onClick={() => shift(1)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100" aria-label="Next month">
+      <button
+        onClick={() => shift(1)}
+        className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+        aria-label="Next month"
+      >
         <ChevronDown className="h-4 w-4 -rotate-90" />
       </button>
     </div>

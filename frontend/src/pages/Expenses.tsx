@@ -26,8 +26,8 @@ export default function Expenses() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Expenses</h1>
-          <p className="text-sm text-slate-500">Browse, search, and manage every expense your family has logged.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Expenses</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Browse, search, and manage every expense your family has logged.</p>
         </div>
         <Button onClick={() => open()}>
           <Plus className="h-4 w-4" /> Add Expense
@@ -39,12 +39,12 @@ export default function Expenses() {
       </Card>
 
       <Card className="p-0">
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-          <p className="text-sm text-slate-500">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-800">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {data ? `${data.pagination.total} transaction${data.pagination.total === 1 ? "" : "s"}` : "Loading..."}
           </p>
           {data && data.items.length > 0 && (
-            <p className="text-sm font-semibold text-slate-800">Page total: {formatPaise(total)}</p>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Page total: {formatPaise(total)}</p>
           )}
         </div>
 
@@ -83,7 +83,7 @@ export default function Expenses() {
         </div>
 
         {data && data.pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3">
+          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 dark:border-slate-800">
             <Button
               variant="secondary"
               size="sm"
@@ -92,7 +92,7 @@ export default function Expenses() {
             >
               Previous
             </Button>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Page {data.pagination.page} of {data.pagination.totalPages}
             </p>
             <Button
