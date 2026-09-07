@@ -247,3 +247,38 @@ cd frontend && npm install && npm run dev
 
 Then open the URL printed by the frontend dev server (usually `http://localhost:5173`,
 or the next free port if that one's taken).
+
+## 13. Android App
+
+The same frontend is wrapped as a native Android app with [Capacitor](https://capacitorjs.com)
+(`frontend/android/`) — same UI, same code, just installable as a real app instead of a
+website. It bundles the built web assets locally and talks to the same production API
+(`family-expense-backend-mmrw.onrender.com`), so it needs network access but works exactly
+like the website otherwise.
+
+**Requirements to rebuild it:**
+- Android SDK (`ANDROID_HOME` set; this machine already has one at
+  `%LOCALAPPDATA%\Android\Sdk`) — no full Android Studio install needed, the SDK alone is
+  enough to build from the command line.
+- **JDK 21** specifically (Capacitor 8's Android module requires it — newer or older JDKs
+  will fail the build with a source/class-version error). Point Gradle at one via
+  `org.gradle.java.home` in `%USERPROFILE%\.gradle\gradle.properties` (global, not
+  committed — keeps the repo portable) rather than relying on whatever `java` is on PATH.
+
+**To rebuild after a code change:**
+```bash
+cd frontend
+npm run android:sync       # builds the web app (pointed at the production API via
+                            # .env.capacitor) and copies it into the Android project
+cd android
+./gradlew assembleDebug    # -> android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+The output is a **debug-signed APK** — fine to install directly on a family member's phone
+(enable "Install unknown apps" for whichever app you transfer it through) but not suitable
+for the Play Store as-is (that needs a release build signed with a real keystore, which
+hasn't been set up here since this app isn't being published).
+
+If you ever change `FRONTEND_URL`/CORS-related backend config, note the app calls the API
+from the origin `https://localhost` (Capacitor's `androidScheme: 'https'` setting) — see the
+`CAPACITOR_ORIGINS` allow-list in `backend/src/app.ts`.

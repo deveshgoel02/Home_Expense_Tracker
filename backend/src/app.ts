@@ -16,12 +16,17 @@ import { dashboardRouter } from "./routes/dashboard.js";
 import { reportsRouter } from "./routes/reports.js";
 import { settingsRouter } from "./routes/settings.js";
 
-// Accepts the configured FRONTEND_URL plus any *.vercel.app preview deployment,
-// so pull-request previews on Vercel work without touching this env var each time.
+// Accepts the configured FRONTEND_URL, any *.vercel.app preview deployment
+// (so pull-request previews work without touching this env var each time),
+// and the Capacitor Android app's bundled-assets origin (androidScheme:
+// 'https' in capacitor.config.ts serves local assets from https://localhost;
+// iOS's default capacitor://localhost is also allowed in case that's added later).
+const CAPACITOR_ORIGINS = new Set(["https://localhost", "capacitor://localhost"]);
+
 function buildCorsOrigin() {
   const configured = process.env.FRONTEND_URL ?? "http://localhost:5173";
   return (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    if (!origin || origin === configured) return callback(null, true);
+    if (!origin || origin === configured || CAPACITOR_ORIGINS.has(origin)) return callback(null, true);
     try {
       if (/\.vercel\.app$/.test(new URL(origin).hostname)) return callback(null, true);
     } catch {
