@@ -7,10 +7,12 @@ import {
   computeBudgetPace,
   computeBudgetStatus,
   computeMonthlySummary,
+  computeOverallBudgetStatus,
   dailySeries,
   generateAlerts,
   generateBudgetPaceAlerts,
   generateInsights,
+  generateOverallBudgetAlert,
 } from "./calculations.js";
 import {
   getCategoryNameMap,
@@ -82,6 +84,15 @@ export async function buildDashboard(month: number, year: number) {
   const budgetPace = computeBudgetPace(budgetStatus, dayOfMonth, daysInMonth(month, year), settings.budgetCriticalPercent);
   const budgetAlerts = generateBudgetPaceAlerts(budgetPace);
 
+  const totalBudgetPaise = budgets.reduce((sum, b) => sum + b.amountPaise, 0);
+  const overallBudget = computeOverallBudgetStatus(
+    totalBudgetPaise,
+    bundle.summary.totalExpensePaise,
+    settings.budgetWarningPercent,
+    settings.budgetCriticalPercent
+  );
+  const overallBudgetAlert = generateOverallBudgetAlert(overallBudget);
+
   return {
     month,
     year,
@@ -90,10 +101,11 @@ export async function buildDashboard(month: number, year: number) {
     userBreakdown: bundle.userBreakdown,
     paymentMethodBreakdown: bundle.paymentMethodBreakdown,
     daily: bundle.daily,
-    alerts: [...bundle.alerts, ...budgetAlerts],
+    alerts: [...(overallBudgetAlert ? [overallBudgetAlert] : []), ...bundle.alerts, ...budgetAlerts],
     insights,
     recentTransactions,
     budgetStatus: budgetPace,
+    overallBudget,
     comparison,
   };
 }

@@ -124,6 +124,14 @@ export interface BudgetStatus {
   onPaceToExceed?: boolean;
 }
 
+export interface OverallBudgetStatus {
+  budgetPaise: number;
+  actualPaise: number;
+  remainingPaise: number;
+  percentUsed: number;
+  severity: AlertSeverity;
+}
+
 export interface MonthComparison {
   current: MonthlySummary;
   previous: MonthlySummary;
@@ -148,6 +156,7 @@ export interface Dashboard {
   insights: string[];
   recentTransactions: Expense[];
   budgetStatus: BudgetStatus[];
+  overallBudget: OverallBudgetStatus | null;
   comparison: MonthComparison;
 }
 

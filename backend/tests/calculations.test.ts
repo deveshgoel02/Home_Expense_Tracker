@@ -4,10 +4,12 @@ import {
   computeBudgetPace,
   computeBudgetStatus,
   computeMonthlySummary,
+  computeOverallBudgetStatus,
   compareMonths,
   generateAlerts,
   generateBudgetPaceAlerts,
   generateInsights,
+  generateOverallBudgetAlert,
   type ExpenseLike,
   type IncomeLike,
 } from "../src/services/calculations.js";
@@ -216,6 +218,39 @@ describe("computeBudgetStatus", () => {
     const status = computeBudgetStatus([{ categoryId: "petrol", amountPaise: 1200000 }], [], { petrol: "Petrol" }, 80, 100);
     expect(status[0].percentUsed).toBe(0);
     expect(status[0].severity).toBe("info");
+  });
+});
+
+describe("computeOverallBudgetStatus / generateOverallBudgetAlert", () => {
+  it("returns null when no budget has been set for the month", () => {
+    expect(computeOverallBudgetStatus(0, 1000000, 80, 100)).toBeNull();
+  });
+
+  it("warns as spending approaches a ₹1,80,000 budget (income ₹2,00,000 example)", () => {
+    // 1,65,600 of 1,80,000 spent = 92% used
+    const status = computeOverallBudgetStatus(18000000, 16560000, 80, 100);
+    expect(status?.percentUsed).toBe(92);
+    expect(status?.severity).toBe("warning");
+    expect(status?.remainingPaise).toBe(1440000);
+
+    const alert = generateOverallBudgetAlert(status);
+    expect(alert?.severity).toBe("warning");
+    expect(alert?.message).toContain("92%");
+  });
+
+  it("marks the budget critical once spending reaches or exceeds it", () => {
+    const status = computeOverallBudgetStatus(18000000, 18500000, 80, 100);
+    expect(status?.severity).toBe("critical");
+
+    const alert = generateOverallBudgetAlert(status);
+    expect(alert?.severity).toBe("critical");
+    expect(alert?.message).toContain("exceeded");
+  });
+
+  it("raises no alert while comfortably under the warning threshold", () => {
+    const status = computeOverallBudgetStatus(18000000, 9000000, 80, 100);
+    expect(status?.severity).toBe("info");
+    expect(generateOverallBudgetAlert(status)).toBeNull();
   });
 });
 

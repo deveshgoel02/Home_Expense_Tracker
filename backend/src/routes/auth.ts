@@ -36,7 +36,7 @@ authRouter.get(
   "/members",
   asyncHandler(async (_req, res) => {
     const members = await prisma.user.findMany({
-      where: { isActive: true },
+      where: { isActive: true, isHousehold: false },
       select: { id: true, name: true, initials: true, color: true },
       orderBy: { createdAt: "asc" },
     });
@@ -51,7 +51,7 @@ authRouter.post(
     const { name, password } = loginSchema.parse(req.body);
 
     const user = await prisma.user.findUnique({ where: { name } });
-    if (!user || !user.isActive) {
+    if (!user || !user.isActive || user.isHousehold) {
       throw new AppError(401, "Incorrect name or password");
     }
 

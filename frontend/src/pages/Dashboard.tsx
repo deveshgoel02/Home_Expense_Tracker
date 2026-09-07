@@ -102,6 +102,43 @@ export default function Dashboard() {
             <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">{data.summary.expenseRatioPercent}% used</p>
           </Card>
 
+          {data.overallBudget ? (
+            <Card>
+              <CardHeader
+                title="Monthly Budget"
+                subtitle={`${formatPaise(data.overallBudget.actualPaise)} of ${formatPaise(data.overallBudget.budgetPaise)} budget used`}
+                action={
+                  <Link to="/budgets" className="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">
+                    Manage budgets
+                  </Link>
+                }
+              />
+              <ProgressBar percent={data.overallBudget.percentUsed} tone={toneForPercent(data.overallBudget.percentUsed)} />
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+                <p className="font-medium text-slate-600 dark:text-slate-300">{data.overallBudget.percentUsed}% used</p>
+                <p
+                  className={
+                    data.overallBudget.remainingPaise < 0
+                      ? "font-semibold text-red-600 dark:text-red-400"
+                      : "text-slate-500 dark:text-slate-400"
+                  }
+                >
+                  {data.overallBudget.remainingPaise < 0
+                    ? `${formatPaise(Math.abs(data.overallBudget.remainingPaise))} over budget`
+                    : `${formatPaise(data.overallBudget.remainingPaise)} remaining`}
+                </p>
+              </div>
+            </Card>
+          ) : (
+            <Card className="text-sm text-slate-500 dark:text-slate-400">
+              No budget set for {monthLabel(month, year)} yet.{" "}
+              <Link to="/budgets" className="font-medium text-brand-600 hover:underline dark:text-brand-400">
+                Set category budgets
+              </Link>{" "}
+              to track overall spending against a monthly budget here.
+            </Card>
+          )}
+
           {data.alerts.length > 0 && (
             <div className="space-y-2">
               {data.alerts.map((alert, idx) => (

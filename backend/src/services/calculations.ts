@@ -370,6 +370,61 @@ export interface BudgetStatus {
   severity: AlertSeverity;
 }
 
+export interface OverallBudgetStatus {
+  budgetPaise: number;
+  actualPaise: number;
+  remainingPaise: number;
+  percentUsed: number;
+  severity: AlertSeverity;
+}
+
+// Family-wide budget for the month (the sum of every category budget set for
+// it), compared against actual spending — distinct from computeBudgetStatus,
+// which tracks each category budget individually.
+export function computeOverallBudgetStatus(
+  totalBudgetPaise: number,
+  totalExpensePaise: number,
+  warningPercent: number,
+  criticalPercent: number
+): OverallBudgetStatus | null {
+  if (totalBudgetPaise <= 0) return null;
+
+  const percentUsed = percent(totalExpensePaise, totalBudgetPaise);
+  let severity: AlertSeverity = "info";
+  if (percentUsed >= criticalPercent) severity = "critical";
+  else if (percentUsed >= warningPercent) severity = "warning";
+
+  return {
+    budgetPaise: totalBudgetPaise,
+    actualPaise: totalExpensePaise,
+    remainingPaise: totalBudgetPaise - totalExpensePaise,
+    percentUsed,
+    severity,
+  };
+}
+
+export function generateOverallBudgetAlert(status: OverallBudgetStatus | null): Alert | null {
+  if (!status) return null;
+
+  if (status.severity === "critical") {
+    return {
+      severity: "critical",
+      message: `Monthly budget exceeded — spent ₹${formatRupees(status.actualPaise)} of ₹${formatRupees(
+        status.budgetPaise
+      )} (${status.percentUsed}%).`,
+    };
+  }
+  if (status.severity === "warning") {
+    return {
+      severity: "warning",
+      message: `You've used ${status.percentUsed}% of this month's ₹${formatRupees(
+        status.budgetPaise
+      )} budget — ₹${formatRupees(status.remainingPaise)} remaining.`,
+    };
+  }
+  return null;
+}
+
 export function computeBudgetStatus(
   budgets: BudgetLike[],
   categoryBreakdown: BreakdownItem[],

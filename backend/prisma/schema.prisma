@@ -23,6 +23,10 @@ model User {
   initials          String
   color             String    @default("#6366f1")
   isActive          Boolean   @default(true)
+  // A shared/household pseudo-member (e.g. "House / Home Expense") used to
+  // attribute expenses that aren't any one person's — not a real login, so
+  // it's excluded from the login screen and blocked from signing in.
+  isHousehold       Boolean   @default(false)
   passwordHash      String
   mustChangePassword Boolean  @default(true)
   lastLoginAt       DateTime?
