@@ -106,6 +106,13 @@ export default function Login() {
             {isSubmitting ? "Signing in..." : "Sign In"}
           </Button>
         </form>
+
+        <a
+          href="/downloads/family-expense-tracker.apk"
+          className="mt-5 block text-center text-xs font-medium text-brand-600 hover:underline dark:text-brand-400"
+        >
+          Get the Android app (.apk)
+        </a>
       </div>
     </div>
   );
